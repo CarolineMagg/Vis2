@@ -1,0 +1,22 @@
+#version 440 core                                                                                                                                 
+                                                                                    
+layout(points) in;                                                                  
+layout(points) out;                                                         
+layout(max_vertices = 1) out;                                                       
+                   
+out vec3 FragPos;
+
+uniform mat4 VP;                                                                                                        
+                                                                                    
+void main()                                                                         
+{                                                                                   
+    vec3 Pos = gl_in[0].gl_Position.xyz;                                            
+                                                         
+    gl_Position = VP * vec4(Pos,1.0f); 
+	FragPos = Pos;
+    EmitVertex();                                                               
+                                                                                    
+    EndPrimitive();                                                                 
+
+	
+}                                                                                   
