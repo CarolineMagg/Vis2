@@ -1,0 +1,155 @@
+#version 440 core
+//inspired by VU slides
+#define _SPOT_LIGHTS_COUNT **%%SPOT_LIGHT_COUNT%%**
+#define _POINT_LIGHTS_COUNT **%%POINT_LIGHT_COUNT%%**
+#define NUM_SAMPLES 64
+#define PI_4 (0.07957747154594766788444188168626)
+float dither_pattern[16] = float[16] (
+	0.0f, 0.5f, 0.125f, 0.625f,
+	0.75f, 0.22f, 0.875f, 0.375f,
+	0.1875f, 0.6875f, 0.0625f, 0.5625,
+	0.9375f, 0.4375f, 0.8125f, 0.3125
+);
+
+in vec2 TexCoords;
+
+out vec4 FragColor;
+
+struct PointLight {
+    vec3 position;
+
+    vec3 energy;   
+
+	float constant;
+	float linear;
+	float quadratic;
+
+	float bias;
+};
+
+struct SpotLight {
+    vec3 direction;
+    float cutOff;
+    float outerCutOff;
+
+    vec3 position; 
+    vec3 energy;    
+
+	float constant;
+	float linear;
+	float quadratic;
+
+	float bias;
+	bool isActive;
+};
+
+struct VolumeProperties {
+	bool hasVolume;
+	float tau;
+	int phi;
+};
+
+uniform SpotLight spotLights[_SPOT_LIGHTS_COUNT];
+uniform sampler2DShadow spotLightsDepthMaps[_SPOT_LIGHTS_COUNT];
+uniform mat4 lightProjectionMatrix[_SPOT_LIGHTS_COUNT];
+uniform mat4 lightViewMatrix[_SPOT_LIGHTS_COUNT];
+uniform VolumeProperties spotLightsVolume[_SPOT_LIGHTS_COUNT];
+
+uniform mat4 inverseView;
+uniform mat4 inverseProjection;
+uniform vec3 viewPos;
+
+uniform sampler2DMS sceneDepth;
+
+vec4 calculateWorldPos(float depth);
+float addSpotLightVolume(vec4 fragPos, int spotLightIndex);
+
+void main() {
+
+	float depth = texelFetch(sceneDepth, ivec2(textureSize(sceneDepth) * TexCoords), 0).r;	
+	vec4 fragPos = calculateWorldPos(depth);
+	vec3 result = vec3(0);
+
+	vec3 one = vec3(1.0f, 1.0f, 1.0f);
+	for(int i = 0; i < _SPOT_LIGHTS_COUNT; i++) {
+		if (spotLights[i].isActive && spotLightsVolume[i].hasVolume) {
+			vec3 res = addSpotLightVolume(fragPos, i) * spotLights[i].energy; 
+			// screen
+			result =  one - (one - result) * (one - res);
+		}
+	}
+	
+	//FragColor = vec4(result, 0.2f) + sceneC;
+	FragColor = vec4(result, 1.0f);
+}
+
+//VU slides
+vec4 calculateWorldPos(float depth) {
+    vec4 clip_space_position = vec4(TexCoords * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+    vec4 view_space_position = inverseProjection * clip_space_position;
+
+    // Perspective divide
+    view_space_position /= view_space_position.w;
+
+    vec4 world_space_position = inverseView * view_space_position;
+    return vec4(world_space_position.xyz, 1.0f);
+}
+
+float addSpotLightVolume(vec4 fragPos, int spotLightIndex) {
+	SpotLight light = spotLights[spotLightIndex];
+	float dither = dither_pattern[ (int(gl_FragCoord.x) % 4) * 4 + (int(gl_FragCoord.y) % 4) ];
+	float volume = 0.0;
+	float eps = (light.cutOff - light.outerCutOff);
+	vec4 eyePos  = vec4(viewPos, 1.0);		
+	
+	vec4 eyePosLightView = lightViewMatrix[spotLightIndex] * eyePos;
+	vec4 fragPosLightView = lightViewMatrix[spotLightIndex] * fragPos;	
+			
+	float remainingRayLength = length(eyePos - fragPos);
+	float stepMagnitude = remainingRayLength / NUM_SAMPLES;
+	float stepMagnitudeLightView = length(eyePosLightView - fragPosLightView) / NUM_SAMPLES;
+
+	vec4 stepMove =  stepMagnitude * normalize(eyePos - fragPos);
+	vec4 stepMoveLightView = stepMagnitudeLightView * normalize(eyePosLightView - fragPosLightView);
+		
+	vec4 currentRayPosition = fragPos + dither * stepMove;
+	vec4 currentRayPositionLight = fragPosLightView + dither * stepMoveLightView;
+	
+	//move these to uniforms
+	float lightTau = spotLightsVolume[spotLightIndex].tau;
+	float lightPhi  = spotLightsVolume[spotLightIndex].phi;	
+
+	//vec3 texelSize = 1.0f / vec3(textureSize(spotLightsDepthMaps[spotLightIndex], 0), 0);
+	float mult = lightPhi * PI_4 * lightTau * stepMagnitude;
+			
+	for (; remainingRayLength > stepMagnitude; remainingRayLength -= stepMagnitude) {
+		vec3 light_delta = light.position - currentRayPosition.xyz;
+		float distance  = length(light_delta);			
+		float intensity = 1.0f;		
+		if (distance < 2.0) intensity = 0; // create a cone as start point
+		vec3 light_dir = normalize(light_delta);		
+		float theta = dot(light_dir, normalize(-light.direction)) ; 
+		// avoid blob of intense color at origin when intensity is higher
+		// this allows longer, smooth rays of light
+		intensity *= clamp((theta - light.outerCutOff) / eps, 0.0, (1 - min(volume, 1.0f)) * 0.5 );
+		//intensity *= clamp((theta - light.outerCutOff) / eps, 0.0, 1.0f);
+
+		if (intensity > 0.0f) {
+			//attenuation
+			intensity *= 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+			vec4 rpls = lightProjectionMatrix[spotLightIndex] * vec4(currentRayPositionLight.xyz, 1);			 
+			vec3 projCoords = rpls.xyz / rpls.w;		
+			projCoords = projCoords * 0.5f + 0.5f;		
+			float visibility = texture(spotLightsDepthMaps[spotLightIndex], vec3(projCoords.xy, projCoords.z - (light.bias * distance/100.0f)));// + texelSize * vec3(0, 0, 0)); 			 // see if more samples help
+						
+			float distanceI = 1.0f / distance;
+		
+			volume += visibility * mult * intensity * distanceI * distanceI * exp(-distance * lightTau) * exp(-remainingRayLength * lightTau);
+		}
+	
+		currentRayPosition += stepMove;
+		currentRayPositionLight += stepMoveLightView;		
+	}
+	
+	return min(volume, 1.0f) ;
+}

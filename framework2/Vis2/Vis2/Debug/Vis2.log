@@ -1,0 +1,4 @@
+﻿  pch.cpp
+  Vis2.cpp
+c:\users\caroline\documents\studium\msc_visual computing\5. semester\vis2\ue\vis2\framework2\vis2\vis2\vis2.cpp(12): fatal error C1010: Unerwartetes Dateiende während der Suche nach dem vorkompilierten Header. Haben Sie möglicherweise vergessen, im Quellcode "#include "pch.h"" einzufügen?
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(423,5): error MSB6006: "CL.exe" wurde mit dem Code 2 beendet.
