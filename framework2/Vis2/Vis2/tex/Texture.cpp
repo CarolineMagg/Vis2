@@ -20,15 +20,18 @@ Texture::Texture(string fileName, string dir, string type) {
 }
 
 
-unsigned int Texture::loadTexture(string path, int &width, int &height, int &nrChannels) {
+unsigned int Texture::loadTexture(string path, int width, int height, int nrChannels) {
 
 	unsigned int id;
 	glGenTextures(1, &id);
 
+	//stbi_set_flip_vertically_on_load(true);
 	stbi_uc *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
 	if (data) {
 		GLenum format;
-		if (nrChannels == 3)
+		if (nrChannels == 1)
+			format = GL_RED;
+		else if (nrChannels == 3)
 			format = GL_RGB;
 		else if (nrChannels == 4)
 			format = GL_RGBA;
@@ -49,6 +52,66 @@ unsigned int Texture::loadTexture(string path, int &width, int &height, int &nrC
 	}
 	stbi_image_free(data);
 
+	return id;
+}
+
+unsigned int Texture::load3DTexture(std::string path, int width, int height, int nrChannels, int beginIndex, int endIndex, std::string fileType, int numLength)
+{
+	unsigned int id;
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_3D, id);	
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	float borderColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	glTexParameterfv(GL_TEXTURE_3D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+	
+	GLenum format;
+	GLenum sizedFormat;
+	
+	for (int i = beginIndex; i < endIndex + 1; i++)
+	{
+		std::string indexS = std::to_string(i);
+		while (indexS.length() < numLength) {
+			indexS = "0" + indexS;
+		}
+		std::string path_img = path + indexS + fileType;
+		//std::cout << path_img << endl;
+		stbi_set_flip_vertically_on_load(true);
+		stbi_uc* data = stbi_load(path_img.c_str(), &width, &height, &nrChannels, 0);
+
+		if (data) {
+
+			if (i == beginIndex) {	
+
+				if (nrChannels == 1) {
+					format = GL_RED;
+					sizedFormat = GL_R8;
+				}					
+				else if (nrChannels == 3) {
+					format = GL_RGB;
+					sizedFormat = GL_RGB8;
+				}
+				else if (nrChannels == 4) {
+					format = GL_RGBA;
+					sizedFormat = GL_RGBA8;
+				} else
+					cout << "Unsupported Texture format!" << path << endl;
+
+				glTexStorage3D(GL_TEXTURE_3D, 1, sizedFormat, width, height, endIndex - beginIndex + 1);
+			}
+
+			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, i - beginIndex, width, height, 1, format, GL_UNSIGNED_BYTE, data);			
+		}
+		else {
+			cout << "Texture failed to load: " << path << endl;
+		}
+		stbi_image_free(data);
+	}
+
+	glBindTexture(GL_TEXTURE_3D, 0);
 	return id;
 }
 

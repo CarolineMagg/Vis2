@@ -5,16 +5,16 @@
 #include "../shading/Shader.h"
 
 Camera::Camera(float fov, float aspectRatio, float near, float far) {	
-	this->position = glm::vec3(-17.5f, 21.0f, 32.0f);
+	this->position = glm::vec3(0.0f, 0.0f, 0.0f);
 	this->front = glm::vec3(0.65f, -0.4f, -0.65f);
 	//this->position = glm::vec3(0.0f, 2.0f, 0.0f);
 	//this->front = glm::vec3(0.0f, 0.0f, -1.0f);
 	this->up = glm::vec3(0.0f, 1.0f, 0.0f);
-	projection = glm::perspective(glm::radians(fov), aspectRatio, near, far);
-	cameraMovement = std::make_unique<CameraMovement>();
+	projection = glm::perspective(glm::radians(fov), aspectRatio, near, far);	
 
-	ftc.setCamInternals(fov, aspectRatio, near, far);
-
+	nearPlane = near;
+	farPlane = far;
+		
 	init();
 }
 
@@ -22,7 +22,7 @@ Camera::Camera(glm::vec3 aPosition, glm::vec3 aFront, glm::vec3 aUp) {
 	position = aPosition;
 	front = aFront;
 	up = aUp;
-	cameraMovement = std::make_unique<CameraMovement>();
+	
 	init();
 }
 
@@ -37,16 +37,8 @@ void Camera::init() {
 void Camera::frameUpdate(float deltaT) {
 	if (!locked) {
 		calculateFront();
-		viewMatrix = glm::lookAt(position, position + front, up);		
-		ftc.setCamDef(position, position + front, up);
-	} else {
-		cameraMovement->update(deltaT);
-		setPosition(cameraMovement->getPosition());
-		setLookAt(cameraMovement->getLookAt());
-		viewMatrix = glm::lookAt(position, cameraMovement->getLookAt(), up);
-		ftc.setCamDef(position, cameraMovement->getLookAt(), up);
-	}
-	
+		viewMatrix = glm::lookAt(position, position + front, up);				
+	}	
 }
 
 void Camera::setPosition(float x, float y, float z) {

@@ -157,50 +157,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera\Camera.cpp" />
-    <ClCompile Include="camera\CameraMovement.cpp" />
-    <ClCompile Include="lights\LightManager.cpp" />
-    <ClCompile Include="lights\PointLight.cpp" />
-    <ClCompile Include="lights\SLParticleSystem.cpp" />
-    <ClCompile Include="lights\SpotLight.cpp" />
-    <ClCompile Include="mesh\Mesh.cpp" />
-    <ClCompile Include="mesh\Model.cpp" />
+    <ClCompile Include="mesh\Cube.cpp" />
     <ClCompile Include="render\FBO.cpp" />
-    <ClCompile Include="render\FrustumCull.cpp" />
-    <ClCompile Include="render\FrustumPlane.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="scenebuilder\SceneBuilder.cpp" />
-    <ClCompile Include="SceneObject.cpp" />
-    <ClCompile Include="SceneObjectGeometry.cpp" />
-    <ClCompile Include="shading\MainShader.cpp" />
     <ClCompile Include="shading\Shader.cpp" />
-    <ClCompile Include="shading\VolumetricLightShader.cpp" />
     <ClCompile Include="tex\Texture.cpp" />
-    <ClCompile Include="tex\TonalArtMap.cpp" />
     <ClCompile Include="Vis2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera\Camera.h" />
-    <ClInclude Include="camera\CameraMovement.h" />
     <ClInclude Include="camera\Constants.h" />
-    <ClInclude Include="lights\Light.h" />
-    <ClInclude Include="lights\SLParticleSystem.h" />
-    <ClInclude Include="mesh\Mesh.h" />
-    <ClInclude Include="mesh\Model.h" />
-    <ClInclude Include="mesh\RenderStructs.h" />
+    <ClInclude Include="mesh\Cube.h" />
     <ClInclude Include="render\FBO.h" />
-    <ClInclude Include="render\FrustumCull.h" />
-    <ClInclude Include="render\FrustumPlane.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="scenebuilder\SceneBuilder.h" />
-    <ClInclude Include="SceneObject.h" />
-    <ClInclude Include="SceneObjectGeometry.h" />
     <ClInclude Include="shading\Shader.h" />
-    <ClInclude Include="shading\SpecializedShaders.h" />
     <ClInclude Include="tex\Texture.h" />
-    <ClInclude Include="tex\TonalArtMap.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc140-mt.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="assets\shaders\base_vs.txt" />
+    <Text Include="assets\shaders\basic_render_fs.txt" />
+    <Text Include="assets\shaders\basic_render_vs.txt" />
+    <Text Include="assets\shaders\debug_texturedraw_fs.txt" />
+    <Text Include="assets\shaders\debug_texturedraw_vs.txt" />
+    <Text Include="assets\shaders\vol_fs.txt" />
+    <Text Include="assets\shaders\vol_vs.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
