@@ -76,9 +76,6 @@ float Camera::getSpeed() {
 }
 
 const glm::mat4& Camera::getViewMatrix() const {
-	
-	//std::cout << "pos: " << position.x << "," << position.y << "," << position.z << std::endl;
-	//std::cout << "dir: " << front.x << "," << front.y << "," << front.z << std::endl;
 	return viewMatrix;
 }
 
@@ -92,7 +89,6 @@ void Camera::resetCamera(glm::vec3 pos, glm::vec3 fro, bool isLocked) {
 	if (locked)
 		front = fro;
 }
-
 
 void Camera::calculateFront() {
 	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));

@@ -138,8 +138,7 @@ void FBO::copyFBO(const FBO& from, const FBO& to, unsigned int bufferMask) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, to.fbo);
 		glBlitFramebuffer(0, 0, from.width, from.height, 0, 0, to.width, to.height, bufferMask, GL_NEAREST);
 	}
-
-
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
