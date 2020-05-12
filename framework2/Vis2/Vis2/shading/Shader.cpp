@@ -21,6 +21,41 @@ Shader::Shader(const std::string& vertexFile, const std::string& fragmentFile, c
 		compileVertFragGeomShader(vertexFile, fragmentFile, geometryFile, setInterleaved, varys);
 }
 
+Shader::Shader(const std::string& computeShaderFile)
+{
+	std::string computeCode;	
+	std::ifstream cShaderFile;	
+	// enable exc
+	cShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	
+	try {
+		cShaderFile.open(SHADER_DIR + computeShaderFile);
+		std::stringstream cShaderStream;
+		cShaderStream << cShaderFile.rdbuf();		
+		cShaderFile.close();		
+		computeCode = cShaderStream.str();		
+	}
+	catch (std::ifstream::failure e) {
+		std::cout << "SHADER FILE ERROR::COULD NOT READ FILE" << std::endl;
+	}
+
+	const char* cShaderCode = computeCode.c_str();
+
+	unsigned int compute;
+	//vertex shader
+	compute = glCreateShader(GL_COMPUTE_SHADER);
+	glShaderSource(compute, 1, &cShaderCode, NULL);
+	glCompileShader(compute);
+	checkCompileErrors(compute, "COMPUTE");
+
+	ID = glCreateProgram();
+	glAttachShader(ID, compute);	
+	glLinkProgram(ID);
+	checkCompileErrors(ID, "PROGRAM");
+	buildUniformTable();
+	glDeleteShader(compute);	
+}
+
 void Shader::compileVertFragShader(const std::string& vertexFile, const std::string& fragmentFile) {
 	std::string vertexCode;
 	std::string fragmentCode;

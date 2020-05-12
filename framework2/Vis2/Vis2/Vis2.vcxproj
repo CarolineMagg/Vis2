@@ -172,6 +172,8 @@
     <ClInclude Include="tex\Texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\debug_texturedraw.geom" />
+    <None Include="assets\shaders\volume.frag" />
     <None Include="assimp-vc140-mt.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -180,7 +182,9 @@
     <Text Include="assets\shaders\basic_render_vs.txt" />
     <Text Include="assets\shaders\debug_texturedraw_fs.txt" />
     <Text Include="assets\shaders\debug_texturedraw_vs.txt" />
+    <Text Include="assets\shaders\vol_co.txt" />
     <Text Include="assets\shaders\vol_fs.txt" />
+    <Text Include="assets\shaders\volume.geom" />
     <Text Include="assets\shaders\vol_vs.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

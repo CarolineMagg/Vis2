@@ -5,8 +5,8 @@
 #include "../shading/Shader.h"
 
 Camera::Camera(float fov, float aspectRatio, float near, float far) {	
-	this->position = glm::vec3(0.0f, 0.0f, 0.0f);
-	this->front = glm::vec3(0.65f, -0.4f, -0.65f);
+	this->position = glm::vec3(0.0f, 0.0f, 2.0f);
+	this->front = glm::vec3(0.0f, 0.0f, 1.0f);
 	//this->position = glm::vec3(0.0f, 2.0f, 0.0f);
 	//this->front = glm::vec3(0.0f, 0.0f, -1.0f);
 	this->up = glm::vec3(0.0f, 1.0f, 0.0f);

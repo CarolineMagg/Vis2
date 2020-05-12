@@ -5,8 +5,7 @@
 class FBO {
 public:
 
-	FBO(bool useTextureColor, bool useTextureDepth, bool multiSample, unsigned int width, unsigned int height, bool addSecondColorBuffer = false);
-	FBO(unsigned int nrColorTexture, bool useDepthTexture, bool useMultisampling, unsigned int width, unsigned int height);
+	FBO(unsigned int nrColorTexture, bool useDepthTexture, bool useMultisampling, unsigned int width, unsigned int height, int layers = 1);
 	~FBO();
 
 	static void copyFBO(const FBO& from, const FBO& to, unsigned int bufferMask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -19,29 +18,26 @@ public:
 	const unsigned int getDepthTexture() const { return depthTexture; }
 	const bool isMultiSample() const { return multiSample; };
 
-	void setActive();
+	void setActive(bool doClear = true);
 	void changeSize(unsigned int width, unsigned int height);
+		
+	void bindColorTextureAsImageUnit(unsigned int index, unsigned int bindIndex = 0);
+	void bindAllColorTexturesAsImageUnits();
 
 	static unsigned int MULTI_SAMPLE_COUNT;
 private:
 	unsigned int fbo;
 	unsigned int width;
-	unsigned int height;
-	unsigned int colorTexture; //not needed
-	unsigned int colorTexture2; //not needed
+	unsigned int height;	
 	unsigned int depthTexture;
-
-
 
 	bool useTextureDepth;
 	bool useTextureColor;
 	std::vector<unsigned int> colorTextures;
-	std::vector<unsigned int> multiSampleTextures;
-	bool hasSecondaryColorBuffer;
+	std::vector<unsigned int> multiSampleTextures;	
 	bool multiSample;
+	int layers = 1;
 
-	void createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, bool useMultisampling, unsigned int width, unsigned int height);
-
-	
+	void createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, bool useMultisampling, unsigned int width, unsigned int height, int layers);	
 };
 
