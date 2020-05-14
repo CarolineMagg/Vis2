@@ -11,13 +11,16 @@ in VS_OUT
 out vec2 TexCoords;
 out vec3 WorldPosG;
 
+//out int gl_Layer ;
+
 uniform int glLayer;
 uniform mat4 inverseViewMatrix;
 uniform float currentZVS;
+uniform float sphereRadius;
 
 void main()
 {	
-	for(int i=0; i<3; i++)
+	for(int i=0; i<gl_in.length(); i++)
 	{
 		TexCoords = gs_in[i].aTexCoords;
 		gl_Position = gl_in[i].gl_Position;

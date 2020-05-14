@@ -14,6 +14,7 @@ uniform mat4 inverseViewMatrix;
 uniform mat4 proj;
 uniform int glLayer;
 uniform vec3 middleOfPlaneVS;
+uniform float sphereRadius;
 
 void main()
 {	

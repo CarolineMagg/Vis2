@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "glm/glm.hpp"
+#include <GL\glew.h> 
 
 class Texture {
 public:
@@ -21,5 +22,5 @@ public:
 	unsigned int createEmptyTexture(int width, int height, int nrChannels);
 	void writeOnTexture(unsigned int x, unsigned int y, float value);
 	void writeOnTexture(unsigned int x, unsigned int y, glm::vec3 value);
-	void writeOnTexture(unsigned int x, unsigned int y, glm::vec4 value);
+	void writeOnTexture(unsigned width, unsigned int height, unsigned char* data);
 };

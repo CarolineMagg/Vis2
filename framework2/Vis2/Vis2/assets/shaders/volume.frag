@@ -6,6 +6,7 @@ uniform mat4 inverseViewMatrix;
 uniform float planeDistance;
 uniform float currentZVS;
 uniform vec3 middleOfPlaneVS;
+uniform float sphereRadius;
 
 uniform sampler2DArray vpb;
 uniform sampler2DArray vdb;
@@ -13,6 +14,7 @@ uniform sampler2DArray lb;
 uniform sampler2DArray ldb;
 uniform sampler2DArray cb;
 uniform sampler2DArray mb;
+uniform sampler2DArray debug;
 
 uniform sampler3D volTexture;
 uniform sampler2D colorTransfer;
@@ -23,6 +25,7 @@ layout (location = 2) out vec4 lbOut;
 layout (location = 3) out vec4 ldbOut;
 layout (location = 4) out vec4 cbOut;
 layout (location = 5) out vec4 mbOut;
+layout (location = 6) out vec4 debugOut;
 
 
 void sampleCentralDifferenceValues(vec3 samplePosition, float sampleDistance, out vec3 s1 , out vec3 s2)
@@ -75,7 +78,7 @@ void main() {
 	vec2 lpi_1 = TexCoords - vec2(ldi * planeDistance);
 
 
-	//TODO worldpos way or this way??
+	//TODO worldpos geometry shader way or this way??
 	vec3 volumePosLPI_1 = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + lpi_1 - vec2(0.5), currentZVS, 1.0)).xyz + vec3(0.5);
 	vec3 WorldPos = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + TexCoords - vec2(0.5), currentZVS + planeDistance, 1.0)).xyz + vec3(0.5);
 
@@ -85,30 +88,29 @@ void main() {
 
 	float Si = abs(dFdx(TexCoords.x)) * abs(dFdy(TexCoords.y));  // DOT CORRECT?
 	float Si_1 = abs(dFdx(lpi_1.x)) *  abs(dFdy(lpi_1.y));
-	float Ii = Si_1/Si;
+	float Ii = 1.0;//Si_1/Si;
 
 	// INTEGRATION TABLE LIGHT
 	float volumeX = texture(volTexture, WorldPos).x;
 	float volumeLPI_1 = texture(volTexture, volumePosLPI_1).x;
-	float alphaL = (volumeX + volumeLPI_1) / 2.0;
-	vec3 mL = texture(colorTransfer, vec2(volumeX, volumeLPI_1)).xyz;
-	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL) * (vec4(1.0) - vec4(mL,1.0));
+	vec4 transfer = texture(colorTransfer, vec2(volumeX, volumeLPI_1));
+	float alphaL = transfer.w / 20.0;
+	vec3 mL = 1.0 - transfer.xyz * 0.05;
+	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL) * vec4(mL, 0.0);
 
-	precise vec3 ref = getRefractionGradient(WorldPos + vec3(0.5)) * planeDistance;
+	precise vec3 ref = getRefractionGradient(WorldPos) * planeDistance;
 	
 
 	ldi = normalize(ldi_1 + (vec4(ref, 0.0)));
-
 	
 	lbOut = Li;
 	ldbOut = ldi;
-
-		cbOut = vec4(abs(Li).xyz, 1);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
-		
+			
 
 	// VIEW
 
 	vec4 vpi = texture(vpb, vec3(TexCoords, readLayer));
+	vec4 vpiWorldPos = inverseViewMatrix * vpi;
 	vec4 vdi = texture(vdb, vec3(TexCoords, readLayer));
 	vec4 c = texture(cb, vec3(TexCoords, readLayer));
 	vec3 Ci_1 = c.xyz;
@@ -116,24 +118,28 @@ void main() {
 	vec4 Mi_1 = texture(mb, vec3(TexCoords, readLayer));
 	vec4 id = texture(lb, vec3(TexCoords, readLayer));
 
+	// INTEGRATION TABLE VIEW
+	vec4 vpi_1 = vpi - vdi * planeDistance;
+	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + vec3(0.5, 0.5, 0.5)).x;;		
+	float volumeVPI_1 =  texture(volTexture, vec3(inverseViewMatrix * vpi_1) + vec3(0.5, 0.5, 0.5)).x;
+	vec4 transferV =  texture(colorTransfer, vec2(volumeX, volumeLPI_1)) ;
+	vec3 cV = transferV.xyz;
+	float alphaV = transferV.w;
+	vec3 mV = vec3(1.0) - cV * 0.1;
 
+	vec3 Ci = Ci_1  + ( 1 - min (1.0, Ai_1))  * Mi_1.xyz * ( alphaV *  cV  * id.xyz);
+	float Ai = Ai_1  + (1- min(1.0,Ai_1)) * alphaV;
+	vec3 Mi = Mi_1.xyz * mV;
 
+	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient(vpiWorldPos.xyz), 0.0));
+	vec4 vpi_P1 = vpi + vdi * planeDistance;
+
+	vpbOut = vpi_P1;
+	vdbOut = vdi_P1;
+	cbOut = vec4(Ci, Ai);
+	mbOut = vec4(Mi, 0.0);
+
+	debugOut = vec4(Ci,Ai);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);	
 	
-	vec4 modelColor = texture(volTexture, vec3(inverseViewMatrix * vpi) + vec3(0.5, 0.5, 0.5));	
-	vec4 previousM = texture(mb, vec3(TexCoords, readLayer));		
-	mbOut = previousM + vec4(modelColor.r * 0.01,0,0,0);
 	
-	
-	vpbOut = vpi + vdi * planeDistance;
-	vdbOut = normalize(vdi +vec4(0,0, -planeDistance,0));
-		
-	//cbOut  =  vec4(texture(volTexture, WorldPos + vec3(0.5)).xyz,0.5) + vec4(texture(volTexture, WorldPos + vec3(0.5)).yxz,0.5);
-	//cbOut.xyz += modelColor.yxz;
-
-	//mbOut = texture(volTexture, vec3((inverseViewMatrix * posT).xy + vec2(0.5, 0.5),0.5));
-	//lbOut = modelColor;
-	//ldbOut = vec4(vec3(inverseViewMatrix * vpi) + 0.5,1.0);
-
-
-		
 }

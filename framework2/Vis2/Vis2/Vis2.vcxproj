@@ -159,6 +159,7 @@
     <ClCompile Include="camera\Camera.cpp" />
     <ClCompile Include="mesh\Cube.cpp" />
     <ClCompile Include="render\FBO.cpp" />
+    <ClCompile Include="render\TransferTableBuilder.cpp" />
     <ClCompile Include="shading\Shader.cpp" />
     <ClCompile Include="tex\Texture.cpp" />
     <ClCompile Include="Vis2.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="camera\Constants.h" />
     <ClInclude Include="mesh\Cube.h" />
     <ClInclude Include="render\FBO.h" />
+    <ClInclude Include="render\TransferTableBuilder.h" />
     <ClInclude Include="shading\Shader.h" />
     <ClInclude Include="tex\Texture.h" />
   </ItemGroup>
@@ -182,7 +184,7 @@
     <Text Include="assets\shaders\basic_render_vs.txt" />
     <Text Include="assets\shaders\debug_texturedraw_fs.txt" />
     <Text Include="assets\shaders\debug_texturedraw_vs.txt" />
-    <Text Include="assets\shaders\vol_co.txt" />
+    <Text Include="assets\shaders\volume.comp" />
     <Text Include="assets\shaders\vol_fs.txt" />
     <Text Include="assets\shaders\volume.geom" />
     <Text Include="assets\shaders\vol_vs.txt" />

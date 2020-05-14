@@ -1,6 +1,8 @@
 #include <GL\glew.h> 
 #include <iostream>
+#include <vector>
 #include "Texture.h"
+#include "glm/gtc/type_ptr.hpp"
 
 
 #ifndef  STB_IMAGE_IMPLEMENTATION
@@ -145,7 +147,7 @@ unsigned int Texture::createEmptyTexture(int width, int height, int nrChannels)
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexStorage2D(GL_TEXTURE_2D, 1, sizedFormat, width, height);	
+	glTexStorage2D(GL_TEXTURE_2D, 1, sizedFormat, width, height);		
 
 	glBindTexture(GL_TEXTURE_2D, 0);	
 	return id;
@@ -155,18 +157,22 @@ void Texture::writeOnTexture(unsigned int x, unsigned int y, const float value)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, format, GL_UNSIGNED_BYTE, &value);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Texture::writeOnTexture(unsigned int x, unsigned int y, const glm::vec3 value)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, format, GL_UNSIGNED_BYTE, &value[0]);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::writeOnTexture(unsigned int x, unsigned int y, const glm::vec4 value)
+void Texture::writeOnTexture(unsigned width, unsigned int height, unsigned char* data)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, format, GL_UNSIGNED_BYTE, &value[0]);
+	//glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //stbi_set_flip_vertically_on_load(doFlip);

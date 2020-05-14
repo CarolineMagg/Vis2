@@ -33,6 +33,9 @@
     <ClCompile Include="mesh\Cube.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="render\TransferTableBuilder.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera\Camera.h">
@@ -53,6 +56,9 @@
     <ClInclude Include="mesh\Cube.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="render\TransferTableBuilder.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc140-mt.dll" />
@@ -67,7 +73,7 @@
     <Text Include="assets\shaders\vol_fs.txt" />
     <Text Include="assets\shaders\vol_vs.txt" />
     <Text Include="assets\shaders\base_vs.txt" />
-    <Text Include="assets\shaders\vol_co.txt" />
     <Text Include="assets\shaders\volume.geom" />
+    <Text Include="assets\shaders\volume.comp" />
   </ItemGroup>
 </Project>
