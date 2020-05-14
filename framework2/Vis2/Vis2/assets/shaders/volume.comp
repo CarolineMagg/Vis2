@@ -14,7 +14,7 @@ uniform vec3 lightColor;
 uniform mat4 viewMatrix;
 uniform vec4 viewPos;
 uniform vec3 viewDir;
-
+uniform float sphereRadius;
 uniform vec3 middleOfPlaneVS;
 
 float planeWidth = 512.0;
@@ -31,6 +31,6 @@ void main() {
   imageStore(vdb, pixel_coords, vec4(normalize(pixelPos.xyz), 0.0));
   imageStore(lb, pixel_coords, vec4(lightColor, 1.0));
   imageStore(ldb, pixel_coords, vec4(normalize(pixelPos-lightVSPos), 0.0));
-  imageStore(mb, pixel_coords, vec4(0.0, 0.0, 0.0, 1.0));
+  imageStore(mb, pixel_coords, vec4(1.0));
   imageStore(cb, pixel_coords, vec4(0.0));
 }
