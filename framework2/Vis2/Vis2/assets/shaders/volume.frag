@@ -3,6 +3,7 @@ in vec2 TexCoords;
 in vec3 WorldPosG;
 
 uniform mat4 inverseViewMatrix;
+uniform mat4 viewMatrix;
 uniform float planeDistance;
 uniform float currentZVS;
 uniform vec3 middleOfPlaneVS;
@@ -59,8 +60,9 @@ vec3 getRefractionGradient(vec3 position)
 	s1 = RefractionTransfer(s1);
 	s2 = RefractionTransfer(s2);
 	vec3 diff = s2 - s1;
+	diff = mat3(viewMatrix) * diff;
 
-	return length(diff) > 0 ? normalize(s2-s1) : vec3(0);
+	return length(diff) > 0 ? normalize(diff) : vec3(0);
 }
 
 
@@ -139,7 +141,7 @@ void main() {
 	cbOut = vec4(Ci, Ai);
 	mbOut = vec4(Mi, 0.0);
 
-	debugOut = vec4(Ci,Ai);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);	
+	debugOut = vec4(Si_1/Si, Si/Si_1, 0,1);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);	
 	
 	
 }
