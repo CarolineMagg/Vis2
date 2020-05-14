@@ -1,6 +1,8 @@
 #include <GL\glew.h> 
 #include <iostream>
+#include <vector>
 #include "Texture.h"
+#include "glm/gtc/type_ptr.hpp"
 
 
 #ifndef  STB_IMAGE_IMPLEMENTATION
@@ -16,6 +18,7 @@ Texture::~Texture() {
 Texture::Texture(string fileName, string dir, string type) {
 	loaderDir = dir;
 	loaderName = fileName;
+	
 	id = loadTexture(loaderDir + "/" + loaderName, width, height, nrChannels);
 }
 
@@ -28,7 +31,7 @@ unsigned int Texture::loadTexture(string path, int width, int height, int nrChan
 	//stbi_set_flip_vertically_on_load(true);
 	stbi_uc *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
 	if (data) {
-		GLenum format;
+		
 		if (nrChannels == 1)
 			format = GL_RED;
 		else if (nrChannels == 3)
@@ -67,8 +70,7 @@ unsigned int Texture::load3DTexture(std::string path, int width, int height, int
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
-	
-	GLenum format;
+		
 	GLenum sizedFormat;
 	
 	for (int i = beginIndex; i < endIndex + 1; i++)
@@ -113,6 +115,64 @@ unsigned int Texture::load3DTexture(std::string path, int width, int height, int
 
 	glBindTexture(GL_TEXTURE_3D, 0);
 	return id;
+}
+
+unsigned int Texture::createEmptyTexture(int width, int height, int nrChannels)
+{
+	this->width = width;
+	this->height = height;
+	this->nrChannels = nrChannels;
+	
+	GLenum sizedFormat;
+	if (nrChannels == 1) {
+		format = GL_RED;
+		sizedFormat = GL_R8;
+	}
+	else if (nrChannels == 3) {
+		format = GL_RGB;
+		sizedFormat = GL_RGB8;
+	}
+	else if (nrChannels == 4) {
+		format = GL_RGBA;
+		sizedFormat = GL_RGBA8;
+	}
+	else
+		cout << "Unsupported Texture format!" << endl;
+		
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_2D, id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	float borderColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexStorage2D(GL_TEXTURE_2D, 1, sizedFormat, width, height);		
+
+	glBindTexture(GL_TEXTURE_2D, 0);	
+	return id;
+}
+
+void Texture::writeOnTexture(unsigned int x, unsigned int y, const float value)
+{
+	glBindTexture(GL_TEXTURE_2D, id);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, format, GL_UNSIGNED_BYTE, &value);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::writeOnTexture(unsigned int x, unsigned int y, const glm::vec3 value)
+{
+	glBindTexture(GL_TEXTURE_2D, id);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, 1, 1, format, GL_UNSIGNED_BYTE, &value[0]);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::writeOnTexture(unsigned width, unsigned int height, unsigned char* data)
+{
+	glBindTexture(GL_TEXTURE_2D, id);
+	//glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //stbi_set_flip_vertically_on_load(doFlip);

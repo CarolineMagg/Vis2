@@ -1,0 +1,36 @@
+#version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(rgba32f, binding = 0) uniform image2DArray vpb;
+layout(rgba32f, binding = 1) uniform image2DArray vdb;
+layout(rgba32f, binding = 2) uniform image2DArray lb;
+layout(rgba32f, binding = 3) uniform image2DArray ldb;
+layout(rgba32f, binding = 4) uniform image2DArray cb;
+layout(rgba32f, binding = 5) uniform image2DArray mb;
+
+uniform vec3 voxelSize;
+uniform vec3 lightVSPos;
+uniform vec3 lightColor;
+
+uniform mat4 viewMatrix;
+uniform vec4 viewPos;
+uniform vec3 viewDir;
+uniform float sphereRadius;
+uniform vec3 middleOfPlaneVS;
+
+float planeWidth = 512.0;
+float planeHeight = 512.0;
+
+void main() {
+  
+  ivec3 pixel_coords = ivec3(gl_GlobalInvocationID.xyz);
+  vec4 pixel = vec4(1.0f, 1.0f,  1.0f, 1.0f);
+  
+  vec3 pixelPos = middleOfPlaneVS + vec3(-0.5 + pixel_coords.x/planeWidth, -0.5 + pixel_coords.y/planeHeight, 0);
+
+  imageStore(vpb, pixel_coords, vec4(pixelPos,1.0));
+  imageStore(vdb, pixel_coords, vec4(normalize(pixelPos.xyz), 0.0));
+  imageStore(lb, pixel_coords, vec4(lightColor, 1.0));
+  imageStore(ldb, pixel_coords, vec4(normalize(pixelPos-lightVSPos), 0.0));
+  imageStore(mb, pixel_coords, vec4(1.0));
+  imageStore(cb, pixel_coords, vec4(0.0));
+}

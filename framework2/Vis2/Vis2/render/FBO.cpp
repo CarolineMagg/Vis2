@@ -3,18 +3,11 @@
 
 unsigned int FBO::MULTI_SAMPLE_COUNT = 16;
 
-FBO::FBO(bool useTextureColor, bool useTextureDepth, bool multiSample, unsigned int width, unsigned int height, bool addSecondColorBuffer) 
-	:multiSample(multiSample),width(width), height(height)
-{
-	unsigned int nrColorTexture = addSecondColorBuffer ? 2 : 1;
-	createFrameBuffers(nrColorTexture, useTextureDepth, multiSample, width, height);
 
-}
-
-FBO::FBO(unsigned int nrColorTexture, bool useDepthTexture, bool useDepthMultisample, unsigned int width, unsigned int height) 
+FBO::FBO(unsigned int nrColorTexture, bool useDepthTexture, bool useDepthMultisample, unsigned int width, unsigned int height, int layers) 
 	:multiSample(useDepthMultisample), width(width), height(height)
 {
-	createFrameBuffers(nrColorTexture, useDepthTexture, useDepthMultisample, width, height);
+	createFrameBuffers(nrColorTexture, useDepthTexture, useDepthMultisample, width, height, layers);
 }
 
 
@@ -23,20 +16,22 @@ FBO::~FBO() {
 
 }
 
-void FBO::setActive() {
+void FBO::setActive(bool doClear) {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glViewport(0, 0, width, height);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if (doClear)
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void FBO::changeSize(unsigned int width, unsigned int height)
 {
 }
 
-void FBO::createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, bool useMultisampling, unsigned int width, unsigned int height)
+void FBO::createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, bool useMultisampling, unsigned int width, unsigned int height, int layers)
 {
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	this->layers = layers;
 	if (nrColorTexture > 0) {
 		colorTextures = std::vector<unsigned int>(nrColorTexture);
 		if (useMultisampling)
@@ -53,17 +48,36 @@ void FBO::createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, 
 		else
 		{
 			glGenTextures(nrColorTexture, colorTextures.data());
-
+			
 			for (unsigned int i = 0; i < nrColorTexture; ++i)
 			{
-				glBindTexture(GL_TEXTURE_2D, colorTextures.at(i));
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glBindTexture(GL_TEXTURE_2D, 0);
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorTextures.at(i), 0);
+				
+				if (layers > 1)
+				{
+					glBindTexture(GL_TEXTURE_2D_ARRAY, colorTextures.at(i));
+					glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA32F, width, height, layers);
+					glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, colorTextures.at(i), 0);
+
+					float borderColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+					glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, borderColor);
+					glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+					glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+					glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+				}
+				else
+				{
+					glBindTexture(GL_TEXTURE_2D, colorTextures.at(i));
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+					glBindTexture(GL_TEXTURE_2D, 0);
+					glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorTextures.at(i), 0);
+				}
+				
+				
+				
 			}
 		}
 	}
@@ -81,15 +95,24 @@ void FBO::createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, 
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, depthTexture, 0);
 		}
 		else {
-			glBindTexture(GL_TEXTURE_2D, depthTexture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+			if (layers > 1)
+			{
+				glBindTexture(GL_TEXTURE_2D_ARRAY, depthTexture);
+				glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT16, width, height, layers);
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+			}
+			else
+			{
+				glBindTexture(GL_TEXTURE_2D, depthTexture);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+				glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+				glBindTexture(GL_TEXTURE_2D, 0);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+			}			
 		}
 	}
 	else {
@@ -108,8 +131,7 @@ void FBO::createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, 
 	for (unsigned int i = 0; i < nrColorTexture; ++i) {
 		attachments.push_back(GL_COLOR_ATTACHMENT0 + i);
 	}
-	unsigned int bla = GL_COLOR_ATTACHMENT0;
-	unsigned int bla2 = GL_COLOR_ATTACHMENT1;
+
 	glNamedFramebufferDrawBuffers(fbo, nrColorTexture, attachments.data());
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -121,7 +143,7 @@ void FBO::createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, 
 
 void FBO::copyFBO(const FBO& from, const FBO& to, unsigned int bufferMask) {
 
-	if (from.hasSecondaryColorBuffer && to.hasSecondaryColorBuffer) {
+	/*if (from.hasSecondaryColorBuffer && to.hasSecondaryColorBuffer) {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, from.fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, to.fbo);
 		glNamedFramebufferReadBuffer(from.fbo, GL_COLOR_ATTACHMENT1);
@@ -138,6 +160,7 @@ void FBO::copyFBO(const FBO& from, const FBO& to, unsigned int bufferMask) {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, to.fbo);
 		glBlitFramebuffer(0, 0, from.width, from.height, 0, 0, to.width, to.height, bufferMask, GL_NEAREST);
 	}
+	*/
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -156,4 +179,16 @@ void FBO::copyFBO(unsigned int from, const FBO& to, unsigned int bufferMask) {
 	glBlitFramebuffer(0, 0, to.width, to.height, 0, 0, to.width, to.height, bufferMask, GL_NEAREST);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FBO::bindColorTextureAsImageUnit(unsigned int index, unsigned int bindIndex)
+{
+	glBindImageTexture(bindIndex, getColorTexture(index), 0, layers > 1 ? GL_TRUE : GL_FALSE, layers, GL_WRITE_ONLY, GL_RGBA32F);
+}
+
+void FBO::bindAllColorTexturesAsImageUnits()
+{
+	int index = 0;
+	for (int i : colorTextures)
+		glBindImageTexture(index++, i, 0, layers > 1 ? GL_TRUE : GL_FALSE, layers, GL_WRITE_ONLY, GL_RGBA32F);
 }

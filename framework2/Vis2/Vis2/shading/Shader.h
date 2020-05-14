@@ -10,6 +10,7 @@ public:
 	unsigned int ID;	
 	Shader(const std::string& vertexFile, const std::string& fragmentFile);
 	Shader(const std::string& vertexFile, const std::string& fragmentFile, const std::string& geometryFile, bool setInterleaved = false, const std::vector<char>* varys = nullptr);
+	Shader(const std::string& computeShader);
 	void use() const;
 	void link();
 	

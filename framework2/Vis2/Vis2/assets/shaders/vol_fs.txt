@@ -50,7 +50,7 @@ void main() {
 	// screen blending
 	vec3 result =  one - (one - res);
 
-	FragColor = vec4(result, 1.0f);
+	FragColor = vec4(result, 0.5f);
 }
 
 // from screenspace position (our render cube depth map) to world space so we can shoot rays
