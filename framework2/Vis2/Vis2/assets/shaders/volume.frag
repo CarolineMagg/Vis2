@@ -100,7 +100,7 @@ void main() {
 	vec3 mL = 1.0 - transfer.xyz * 0.05;
 	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL) * vec4(mL, 0.0);
 
-	precise vec3 ref = getRefractionGradient(WorldPos) * planeDistance;
+	precise vec3 ref = getRefractionGradient((WorldPos+volumePosLPI_1)/2.0) * planeDistance;
 	
 
 	ldi = normalize(ldi_1 + (vec4(ref, 0.0)));
@@ -122,8 +122,9 @@ void main() {
 
 	// INTEGRATION TABLE VIEW
 	vec4 vpi_1 = vpi - vdi * planeDistance;
+	vec4 vpi_1WorldPos = inverseViewMatrix * vpi_1;
 	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + vec3(0.5, 0.5, 0.5)).x;;		
-	float volumeVPI_1 =  texture(volTexture, vec3(inverseViewMatrix * vpi_1) + vec3(0.5, 0.5, 0.5)).x;
+	float volumeVPI_1 =  texture(volTexture, vec3(vpi_1WorldPos) + vec3(0.5, 0.5, 0.5)).x;
 	vec4 transferV =  texture(colorTransfer, vec2(volumeX, volumeLPI_1)) ;
 	vec3 cV = transferV.xyz;
 	float alphaV = transferV.w;
@@ -133,7 +134,7 @@ void main() {
 	float Ai = Ai_1  + (1- min(1.0,Ai_1)) * alphaV;
 	vec3 Mi = Mi_1.xyz * mV;
 
-	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient(vpiWorldPos.xyz), 0.0));
+	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0), 0.0));
 	vec4 vpi_P1 = vpi + vdi * planeDistance;
 
 	vpbOut = vpi_P1;
@@ -141,7 +142,7 @@ void main() {
 	cbOut = vec4(Ci, Ai);
 	mbOut = vec4(Mi, 0.0);
 
-	debugOut = vec4(Si_1/Si, Si/Si_1, 0,1);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);	
+	debugOut = vec4(Ci, Ai);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);	
 	
 	
 }
