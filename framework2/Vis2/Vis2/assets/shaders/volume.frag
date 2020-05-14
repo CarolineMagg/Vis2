@@ -101,13 +101,10 @@ void main() {
 	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL) * vec4(mL, 0.0);
 
 	precise vec3 ref = getRefractionGradient((WorldPos+volumePosLPI_1)/2.0) * planeDistance;
-	
-
 	ldi = normalize(ldi_1 + (vec4(ref, 0.0)));
 	
 	lbOut = Li;
-	ldbOut = ldi;
-			
+	ldbOut = ldi;			
 
 	// VIEW
 
@@ -142,7 +139,5 @@ void main() {
 	cbOut = vec4(Ci, Ai);
 	mbOut = vec4(Mi, 0.0);
 
-	debugOut = vec4(Ci, Ai);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);	
-	
-	
+	debugOut = vec4(Ci, Ai);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
 }
