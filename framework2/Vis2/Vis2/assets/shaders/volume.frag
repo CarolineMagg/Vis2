@@ -114,7 +114,7 @@ void main() {
 
 	float Si = abs(dFdx(TexCoords.x)) * abs(dFdy(TexCoords.y));  // DOT CORRECT?
 	float Si_1 = abs(dFdx(lpi_1.x)) *  abs(dFdy(lpi_1.y));
-	float Ii = 1.0;//Si_1/Si;
+	float Ii = Si_1/Si; //IC
 
 	// INTEGRATION TABLE LIGHT
 	float volumeX = texture(volTexture, WorldPos).x;
@@ -128,8 +128,7 @@ void main() {
 	ldi = normalize(ldi_1 + (vec4(ref, 0.0)));
 	
 	lbOut = Li;
-	ldbOut = ldi;
-			
+	ldbOut = ldi;			
 
 	// VIEW
 
