@@ -3,6 +3,7 @@ in vec2 TexCoords;
 in vec3 WorldPosG;
 
 uniform mat4 inverseViewMatrix;
+uniform mat4 viewMatrix;
 uniform float planeDistance;
 uniform float currentZVS;
 uniform vec3 middleOfPlaneVS;
@@ -59,11 +60,20 @@ vec3 getRefractionGradient(vec3 position)
 	s1 = RefractionTransfer(s1);
 	s2 = RefractionTransfer(s2);
 	vec3 diff = s2 - s1;
+	diff = mat3(viewMatrix) * diff;
 
-	return length(diff) > 0 ? normalize(s2-s1) : vec3(0);
+	return length(diff) > 0 ? normalize(diff) : vec3(0);
 }
 
-
+// assume normalized ray/n, no parallelity
+vec3 intersectPlane(vec3 n, vec3 p0, vec3 r, vec3 r0)
+{
+	float d = dot(n, r);
+	//if (abs(d) < 1e-6) return r0;
+	//float t = dot((p0-r0), n) / d;
+	float t = -(dot(r0, n) + p0.z) / d;
+	return r0 + r * t;
+}
 
 
 void main() {
@@ -75,16 +85,32 @@ void main() {
 	//vec4 X = texture(vpb, vec3(TexCoords, readLayer));
 	// LIGHT
 	vec4 ldi = texture(ldb, vec3(TexCoords, readLayer));
-	vec2 lpi_1 = TexCoords - vec2(ldi * planeDistance);
+	vec2 lpi_2 = TexCoords - vec2(ldi * planeDistance);
 
+	
+	vec2 lpi_1 = intersectPlane(
+		vec3(0,0,-1),
+		vec3(0.5, 0.5, currentZVS + planeDistance),
+		-ldi.xyz,
+		vec3(TexCoords, currentZVS)
+	).xy;
+	
+	
 
 	//TODO worldpos geometry shader way or this way??
-	vec3 volumePosLPI_1 = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + lpi_1 - vec2(0.5), currentZVS, 1.0)).xyz + vec3(0.5);
-	vec3 WorldPos = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + TexCoords - vec2(0.5), currentZVS + planeDistance, 1.0)).xyz + vec3(0.5);
+	vec3 volumePosLPI_1 = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + lpi_1 - vec2(0.5), currentZVS + planeDistance, 1.0)).xyz + vec3(0.5);
+	vec3 WorldPos = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + TexCoords - vec2(0.5), currentZVS, 1.0)).xyz + vec3(0.5);
 
 	// TODO FILTERING
 	vec4 Li_1 = texture(lb, vec3(lpi_1, readLayer));
+	
+	
 	vec4 ldi_1 = texture(ldb, vec3(lpi_1, readLayer));
+	/*ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1), readLayer));
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(-1), readLayer));
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1, -1), readLayer));
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(-1, 1), readLayer));
+	ldi_1 = normalize(ldi_1 / 5.0);*/
 
 	float Si = abs(dFdx(TexCoords.x)) * abs(dFdy(TexCoords.y));  // DOT CORRECT?
 	float Si_1 = abs(dFdx(lpi_1.x)) *  abs(dFdy(lpi_1.y));
@@ -98,9 +124,7 @@ void main() {
 	vec3 mL = 1.0 - transfer.xyz * 0.05;
 	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL) * vec4(mL, 0.0);
 
-	precise vec3 ref = getRefractionGradient(WorldPos) * planeDistance;
-	
-
+	precise vec3 ref = getRefractionGradient((WorldPos+volumePosLPI_1)/2.0) * planeDistance;
 	ldi = normalize(ldi_1 + (vec4(ref, 0.0)));
 	
 	lbOut = Li;
@@ -119,9 +143,19 @@ void main() {
 	vec4 id = texture(lb, vec3(TexCoords, readLayer));
 
 	// INTEGRATION TABLE VIEW
-	vec4 vpi_1 = vpi - vdi * planeDistance;
+	//vec4 vpi_1 = vpi - vdi * planeDistance;
+	vec4 vpi_1 = vec4(intersectPlane(
+		vec3(0,0,-1),
+		vec3(0, 0, currentZVS + planeDistance),
+		-vdi.xyz,
+		vpi.xyz
+	), 1.0);
+
+
+
+	vec4 vpi_1WorldPos = inverseViewMatrix * vpi_1;
 	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + vec3(0.5, 0.5, 0.5)).x;;		
-	float volumeVPI_1 =  texture(volTexture, vec3(inverseViewMatrix * vpi_1) + vec3(0.5, 0.5, 0.5)).x;
+	float volumeVPI_1 =  texture(volTexture, vec3(vpi_1WorldPos) + vec3(0.5, 0.5, 0.5)).x;
 	vec4 transferV =  texture(colorTransfer, vec2(volumeX, volumeLPI_1)) ;
 	vec3 cV = transferV.xyz;
 	float alphaV = transferV.w;
@@ -131,15 +165,32 @@ void main() {
 	float Ai = Ai_1  + (1- min(1.0,Ai_1)) * alphaV;
 	vec3 Mi = Mi_1.xyz * mV;
 
-	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient(vpiWorldPos.xyz), 0.0));
-	vec4 vpi_P1 = vpi + vdi * planeDistance;
+	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0), 0.0));
+	
+	//vec4 vpi_P1 = vpi + vdi * planeDistance;
+	vec4 vpi_P1 = vec4(intersectPlane(
+		vec3(0,0,1),
+		vec3(0, 0, currentZVS - planeDistance),
+		vdi.xyz,
+		vpi.xyz
+	), 1.0);
+
+
 
 	vpbOut = vpi_P1;
 	vdbOut = vdi_P1;
 	cbOut = vec4(Ci, Ai);
 	mbOut = vec4(Mi, 0.0);
 
-	debugOut = vec4(Ci,Ai);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);	
-	
-	
+	debugOut = vec4(Ci, Ai);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
 }
+/*
+
+if (lpi_1.x < 0.0 || lpi_1.y < 0.0)
+		debugOut = vec4(0,1,0, 1);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
+	else if (lpi_1.x > 1.0 || lpi_1.y > 1.0)
+		debugOut = vec4(1,0,0, 1);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
+
+		debugOut = vec4(0,0,1, 1);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
+
+		*/
