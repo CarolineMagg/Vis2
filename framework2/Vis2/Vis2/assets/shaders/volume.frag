@@ -90,7 +90,7 @@ void main() {
 
 	float Si = abs(dFdx(TexCoords.x)) * abs(dFdy(TexCoords.y));  // DOT CORRECT?
 	float Si_1 = abs(dFdx(lpi_1.x)) *  abs(dFdy(lpi_1.y));
-	float Ii = 1.0;//Si_1/Si;
+	float Ii = 1;//Si_1/Si;
 
 	// INTEGRATION TABLE LIGHT
 	float volumeX = texture(volTexture, WorldPos).x;
@@ -116,6 +116,7 @@ void main() {
 	float Ai_1 = c.w;
 	vec4 Mi_1 = texture(mb, vec3(TexCoords, readLayer));
 	vec4 id = texture(lb, vec3(TexCoords, readLayer));
+	//vec4 is = vec4(0.0); //TODO: specular component
 
 	// INTEGRATION TABLE VIEW
 	vec4 vpi_1 = vpi - vdi * planeDistance;
@@ -127,7 +128,7 @@ void main() {
 	float alphaV = transferV.w;
 	vec3 mV = vec3(1.0) - cV * 0.1;
 
-	vec3 Ci = Ci_1  + ( 1 - min (1.0, Ai_1))  * Mi_1.xyz * ( alphaV *  cV  * id.xyz);
+	vec3 Ci = Ci_1  + ( 1 - min (1.0, Ai_1))  * Mi_1.xyz * ( alphaV *  cV  * id.xyz); //TODO: add + is.xyz
 	float Ai = Ai_1  + (1- min(1.0,Ai_1)) * alphaV;
 	vec3 Mi = Mi_1.xyz * mV;
 

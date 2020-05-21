@@ -52,7 +52,10 @@ void Camera::setPosition(const glm::vec3& aPosition) {
 void Camera::setLookAt(const glm::vec3 & lookAt)
 {
 	front = glm::normalize(lookAt-position);
+}
 
+void Camera::setFront(const glm::vec3 & newFront) {
+	front = glm::normalize(newFront);
 }
 
 const glm::vec3& Camera::getPosition() const {	
@@ -86,8 +89,8 @@ const glm::mat4& Camera::getProjection() const {
 void Camera::resetCamera(glm::vec3 pos, glm::vec3 fro, bool isLocked) {
 	locked = isLocked;
 	position = pos;
-	if (locked)
-		front = fro;
+	//if (locked)
+	front = fro;
 }
 
 void Camera::calculateFront() {
