@@ -1,11 +1,22 @@
-#include "../tex/Texture.h"
+
 #include "TransferTableBuilder.h"
-#include "spline.h"
-#include <vector>
-unsigned int TransferTableBuilder::getColorAlphaTransferTexture()
+
+TransferTableBuilder::TransferTableBuilder(glm::vec3 newColor1, glm::vec3 newColor2, glm::vec3 newColor3, glm::vec3 newColor4, glm::vec4 newPosition)
 {
-	Texture colorTransfer;
-	colorTransfer.createEmptyTexture(256, 256, 4);
+	colorTexture.createEmptyTexture(256, 256, 4);
+	color1 = newColor1 * glm::vec3(255.0, 255.0, 255.0);
+	color2 = newColor2 * glm::vec3(255.0, 255.0, 255.0);
+	color3 = newColor3 * glm::vec3(255.0, 255.0, 255.0);
+	color4 = newColor4 * glm::vec3(255.0, 255.0, 255.0);
+	position = newPosition;
+	getColorAlphaTransferTexture();
+}
+
+
+unsigned int TransferTableBuilder::getColorAlphaTransferTextureStatic()
+{
+	Texture colorTexture;
+	colorTexture.createEmptyTexture(256, 256, 4);
 
 	std::vector<double> rX{ 0.0, 0.5, 0.8, 1.0 };
 	std::vector<double> rY{ 0, 0, 0, 255 };
@@ -33,7 +44,7 @@ unsigned int TransferTableBuilder::getColorAlphaTransferTexture()
 		for (int j = 0; j < 256; j++)
 		{
 
-			//colorTransfer.writeOnTexture(i, j, (glm::vec3(r(i), g(i), b(i)) + glm::vec3(r(j), g(j), b(j))) / 2.0f);
+			//colorTexture.writeOnTexture(i, j, (glm::vec3(r(i), g(i), b(i)) + glm::vec3(r(j), g(j), b(j))) / 2.0f);
 			unsigned int ri = r((double)i / 255.0);
 			unsigned int rj = r((double)j / 255.0);
 			unsigned int gi = g((double)i / 255.0);
@@ -51,16 +62,73 @@ unsigned int TransferTableBuilder::getColorAlphaTransferTexture()
 		}
 	}
 
-	colorTransfer.writeOnTexture(256, 256, imageData);
+	colorTexture.writeOnTexture(256, 256, imageData);
 
-	return colorTransfer.id;
+	return colorTexture.id;
 }
 
-unsigned int TransferTableBuilder::getColorAlphaTransferTexture(glm::vec3 color1, glm::vec3 color2, glm::vec3 color3, glm::vec3 color4, glm::vec4 position)
+unsigned int TransferTableBuilder::getColorAlphaTransferTexture()
 {
-	Texture colorTransfer;
-	colorTransfer.createEmptyTexture(256, 256, 4);
+	setSplines();
 
+	double x = 1.0;
+	unsigned __int8 imageData[256 * 256 * 4];
+	unsigned int nextInd = 0;
+	for (int i = 0; i < 256; i++)
+	{
+		for (int j = 0; j < 256; j++)
+		{
+
+			//colorTexture.writeOnTexture(i, j, (glm::vec3(r(i), g(i), b(i)) + glm::vec3(r(j), g(j), b(j))) / 2.0f);
+			unsigned int ri = r((double)i / 255.0);
+			unsigned int rj = r((double)j / 255.0);
+			unsigned int gi = g((double)i / 255.0);
+			unsigned int gj = g((double)j / 255.0);
+			unsigned int bi = b((double)i / 255.0);
+			unsigned int bj = b((double)j / 255.0);
+			unsigned int ai = a((double)i / 255.0);
+			unsigned int aj = a((double)j / 255.0);
+			glm::ivec4 colorResults = (glm::ivec4(ri, gi, bi, 255) + glm::ivec4(rj, gj, bj, 255)) / 2;
+
+			imageData[nextInd++] = (ri + rj) / 2;
+			imageData[nextInd++] = (gi + gj) / 2;
+			imageData[nextInd++] = (bi + bj) / 2;
+			imageData[nextInd++] = (ai + aj) / 2;
+		}
+	}
+
+	colorTexture.writeOnTexture(256, 256, imageData);
+
+	return colorTexture.id;
+}
+
+void TransferTableBuilder::setColor1(glm::vec3 newColor)
+{
+	color1 = newColor;
+}
+
+void TransferTableBuilder::setColor2(glm::vec3 newColor)
+{
+	color2 = newColor * glm::vec3(255.0, 255.0, 255.0);
+}
+
+void TransferTableBuilder::setColor3(glm::vec3 newColor)
+{
+	color3 = newColor * glm::vec3(255.0, 255.0, 255.0);
+}
+
+void TransferTableBuilder::setColor4(glm::vec3 newColor)
+{
+	color4 = newColor * glm::vec3(255.0, 255.0, 255.0);
+}
+
+void TransferTableBuilder::setPosition(glm::vec4 newPos)
+{
+	position = newPos;
+}
+
+void TransferTableBuilder::setSplines()
+{
 	std::vector<double> rX{ position[0], position[1], position[2], position[3] };
 	std::vector<double> rY{ color1[0], color2[0], color3[0], color4[0] };
 
@@ -73,39 +141,22 @@ unsigned int TransferTableBuilder::getColorAlphaTransferTexture(glm::vec3 color1
 	std::vector<double> aX{ 0.0, 0.6, 1.0 };
 	std::vector<double> aY{ 0,  0.3 * 255.0, 1.0 * 255.0 };
 
-	tk::spline r, g, b, a;
 	r.set_points(rX, rY);
 	g.set_points(gX, gY);
 	b.set_points(bX, bY);
 	a.set_points(aX, aY);
+}
 
-	double x = 1.0;
-	unsigned __int8 imageData[256 * 256 * 4];
-	unsigned int nextInd = 0;
-	for (int i = 0; i < 256; i++)
-	{
-		for (int j = 0; j < 256; j++)
-		{
+unsigned int TransferTableBuilder::getTransfer()
+{
+	return colorTexture.id;
+}
 
-			//colorTransfer.writeOnTexture(i, j, (glm::vec3(r(i), g(i), b(i)) + glm::vec3(r(j), g(j), b(j))) / 2.0f);
-			unsigned int ri = r((double)i / 255.0);
-			unsigned int rj = r((double)j / 255.0);
-			unsigned int gi = g((double)i / 255.0);
-			unsigned int gj = g((double)j / 255.0);
-			unsigned int bi = b((double)i / 255.0);
-			unsigned int bj = b((double)j / 255.0);
-			unsigned int ai = a((double)i / 255.0);
-			unsigned int aj = a((double)j / 255.0);
-			glm::ivec4 colorResults = (glm::ivec4(ri, gi, bi, 255) + glm::ivec4(rj, gj, bj, 255)) / 2;
-
-			imageData[nextInd++] = (ri + rj) / 2;
-			imageData[nextInd++] = (gi + gj) / 2;
-			imageData[nextInd++] = (bi + bj) / 2;
-			imageData[nextInd++] = (ai + aj) / 2;
-		}
-	}
-
-	colorTransfer.writeOnTexture(256, 256, imageData);
-
-	return colorTransfer.id;
+void TransferTableBuilder::setColorsPos(glm::vec3 newColor1, glm::vec3 newColor2, glm::vec3 newColor3, glm::vec3 newColor4, glm::vec4 newPosition)
+{
+	color1 = newColor1 * glm::vec3(255.0, 255.0, 255.0);
+	color2 = newColor2 * glm::vec3(255.0, 255.0, 255.0);
+	color3 = newColor3 * glm::vec3(255.0, 255.0, 255.0);
+	color4 = newColor4 * glm::vec3(255.0, 255.0, 255.0);
+	position = newPosition;
 }
