@@ -36,8 +36,8 @@ void sampleCentralDifferenceValues(vec3 samplePosition, float sampleDistance, ou
 	s2.x = vec4(texture(volTexture, samplePosition + vec3(sampleDistance,0,0))).r; 
 	s1.y = vec4(texture(volTexture, samplePosition - vec3(0,sampleDistance,0))).r; 
 	s2.y = vec4(texture(volTexture, samplePosition + vec3(0,sampleDistance,0))).r;
-	s1.z = vec4(texture(volTexture, samplePosition - vec3(0,0,sampleDistance))).r;
-	s2.z = vec4(texture(volTexture, samplePosition + vec3(0,0,sampleDistance))).r;	
+	s1.z = vec4(texture(volTexture, samplePosition + vec3(0,0,sampleDistance))).r;
+	s2.z = vec4(texture(volTexture, samplePosition - vec3(0,0,sampleDistance))).r;	
 }
 
 float RefractionTransfer(float value)
@@ -47,7 +47,7 @@ float RefractionTransfer(float value)
 }
 
 vec3 RefractionTransfer(vec3 value)
-{
+{	
 	// for now just some linear interpolation bteween 1 and 1.45
 	return (value * (1.45 - 1.0)) / 255 + 1.0;
 }
@@ -60,13 +60,22 @@ vec3 getRefractionGradient(vec3 position)
 	sampleCentralDifferenceValues(position, planeDistance, s1, s2);
 	s1 = RefractionTransfer(s1);
 	s2 = RefractionTransfer(s2);
-	vec3 diff = s2 - s1;
+	//vec3 diff = (s1 + s2) / 2.0;
+	vec3 diff = (s2 - s1) ;
 	diff = mat3(viewMatrix) * diff;
 
 	return length(diff) > 0 ? normalize(diff) : vec3(0);
 }
 
-
+// assume normalized ray/n, no parallelity
+vec3 intersectPlane(vec3 n, vec3 p0, vec3 r, vec3 r0)
+{
+	float d = dot(n, r);
+	//if (abs(d) < 1e-6) return r0;
+	//float t = dot((p0-r0), n) / d;
+	float t = -(dot(r0, n) + p0.z) / d;
+	return r0 + r * t;
+}
 
 
 void main() {
@@ -76,16 +85,32 @@ void main() {
 	// PRE
 	//vec4 X = texture(vpb, vec3(TexCoords, readLayer));
 	// LIGHT
-	vec4 ldi = texture(ldb, vec3(TexCoords, readLayer));
-	vec2 lpi_1 = TexCoords - vec2(ldi * planeDistance);
+	vec4 ldi = texture(ldb, vec3(TexCoords, readLayer));	
+
+	
+	vec2 lpi_1 = intersectPlane(
+		vec3(0,0,-1),
+		vec3(0.5, 0.5, currentZVS + planeDistance),
+		-ldi.xyz,
+		vec3(TexCoords, currentZVS)
+	).xy;
+	
+	
 
 	//TODO worldpos geometry shader way or this way??
-	vec3 volumePosLPI_1 = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + lpi_1 - vec2(0.5), currentZVS, 1.0)).xyz + vec3(0.5);
-	vec3 WorldPos = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + TexCoords - vec2(0.5), currentZVS + planeDistance, 1.0)).xyz + vec3(0.5);
+	vec3 volumePosLPI_1 = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + lpi_1 - vec2(0.5), currentZVS + planeDistance, 1.0)).xyz + vec3(0.5);
+	vec3 WorldPos = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + TexCoords - vec2(0.5), currentZVS, 1.0)).xyz + vec3(0.5);
 
 	// TODO FILTERING
 	vec4 Li_1 = texture(lb, vec3(lpi_1, readLayer));
+	
+	
 	vec4 ldi_1 = texture(ldb, vec3(lpi_1, readLayer));
+	/*ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1), readLayer));
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(-1), readLayer));
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1, -1), readLayer));
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(-1, 1), readLayer));
+	ldi_1 = normalize(ldi_1 / 5.0);*/
 
 	float Si = abs(dFdx(TexCoords.x)) * abs(dFdy(TexCoords.y));  // DOT CORRECT?
 	float Si_1 = abs(dFdx(lpi_1.x)) *  abs(dFdy(lpi_1.y));
@@ -119,7 +144,16 @@ void main() {
 	vec4 is = vec4(0.0); //TODO: specular component
 
 	// INTEGRATION TABLE VIEW
-	vec4 vpi_1 = vpi - vdi * planeDistance;
+	//vec4 vpi_1 = vpi - vdi * planeDistance;
+	vec4 vpi_1 = vec4(intersectPlane(
+		vec3(0,0,-1),
+		vec3(0, 0, currentZVS + planeDistance),
+		-vdi.xyz,
+		vpi.xyz
+	), 1.0);
+
+
+
 	vec4 vpi_1WorldPos = inverseViewMatrix * vpi_1;
 	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + vec3(0.5, 0.5, 0.5)).x;;		
 	float volumeVPI_1 =  texture(volTexture, vec3(vpi_1WorldPos) + vec3(0.5, 0.5, 0.5)).x;
@@ -132,8 +166,17 @@ void main() {
 	float Ai = Ai_1  + (1- min(1.0,Ai_1)) * alphaV;
 	vec3 Mi = Mi_1.xyz * mV;
 
-	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0), 0.0));
-	vec4 vpi_P1 = vpi + vdi_P1 * planeDistance;
+	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + vec3(0.5, 0.5, 0.5)), 0.0));
+	
+	//vec4 vpi_P1 = vpi + vdi_P1 * planeDistance;
+	vec4 vpi_P1 = vec4(intersectPlane(
+		vec3(0,0,-1),
+		vec3(0, 0, currentZVS - planeDistance),
+		vdi_P1.xyz,
+		vpi.xyz
+	), 1.0);
+
+
 
 	vpbOut = vpi_P1;
 	vdbOut = vdi_P1;
