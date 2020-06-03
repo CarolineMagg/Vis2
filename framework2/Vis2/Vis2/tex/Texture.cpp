@@ -60,6 +60,7 @@ unsigned int Texture::loadTexture(string path, int width, int height, int nrChan
 
 unsigned int Texture::load3DTexture(std::string path, int width, int height, int nrChannels, int beginIndex, int endIndex, std::string fileType, int numLength)
 {
+	std::cout << "Load " << path << std::endl;
 	unsigned int id;
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_3D, id);	

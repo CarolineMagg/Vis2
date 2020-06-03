@@ -1,14 +1,27 @@
 
 #include "TransferTableBuilder.h"
 
-TransferTableBuilder::TransferTableBuilder(glm::vec3 newColor1, glm::vec3 newColor2, glm::vec3 newColor3, glm::vec3 newColor4, glm::vec4 newPosition)
+TransferTableBuilder::TransferTableBuilder(glm::vec4 newColor1, glm::vec4 newColor2, glm::vec4 newColor3, glm::vec4 newColor4, glm::vec4 newPosition)
 {
+	std::cout << "Init transfer function " << std::endl;
 	colorTexture.createEmptyTexture(256, 256, 4);
-	color1 = newColor1 * glm::vec3(255.0, 255.0, 255.0);
-	color2 = newColor2 * glm::vec3(255.0, 255.0, 255.0);
-	color3 = newColor3 * glm::vec3(255.0, 255.0, 255.0);
-	color4 = newColor4 * glm::vec3(255.0, 255.0, 255.0);
+	color1 = newColor1 * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color2 = newColor2 * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color3 = newColor3 * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color4 = newColor4 * glm::vec4(255.0, 255.0, 255.0, 255.0);
 	position = newPosition;
+	getColorAlphaTransferTexture();
+}
+
+TransferTableBuilder::TransferTableBuilder(glm::vec4 *newColor)
+{
+	std::cout << "Init transfer function " << std::endl;
+	colorTexture.createEmptyTexture(256, 256, 4);
+	color1 = newColor[0] * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color2 = newColor[1] * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color3 = newColor[2] * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color4 = newColor[3] * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	position = newColor[4];
 	getColorAlphaTransferTexture();
 }
 
@@ -102,24 +115,24 @@ unsigned int TransferTableBuilder::getColorAlphaTransferTexture()
 	return colorTexture.id;
 }
 
-void TransferTableBuilder::setColor1(glm::vec3 newColor)
+void TransferTableBuilder::setColor1(glm::vec4 newColor)
 {
-	color1 = newColor;
+	color1 = newColor * glm::vec4(255.0, 255.0, 255.0, 255.0);
 }
 
-void TransferTableBuilder::setColor2(glm::vec3 newColor)
+void TransferTableBuilder::setColor2(glm::vec4 newColor)
 {
-	color2 = newColor * glm::vec3(255.0, 255.0, 255.0);
+	color2 = newColor * glm::vec4(255.0, 255.0, 255.0, 255.0);
 }
 
-void TransferTableBuilder::setColor3(glm::vec3 newColor)
+void TransferTableBuilder::setColor3(glm::vec4 newColor)
 {
-	color3 = newColor * glm::vec3(255.0, 255.0, 255.0);
+	color3 = newColor * glm::vec4(255.0, 255.0, 255.0, 255.0);
 }
 
-void TransferTableBuilder::setColor4(glm::vec3 newColor)
+void TransferTableBuilder::setColor4(glm::vec4 newColor)
 {
-	color4 = newColor * glm::vec3(255.0, 255.0, 255.0);
+	color4 = newColor * glm::vec4(255.0, 255.0, 255.0, 255.0);
 }
 
 void TransferTableBuilder::setPosition(glm::vec4 newPos)
@@ -138,8 +151,8 @@ void TransferTableBuilder::setSplines()
 	std::vector<double> bX{ position[0], position[1], position[2], position[3] };
 	std::vector<double> bY{ color1[2], color2[2], color3[2], color4[2] };
 
-	std::vector<double> aX{ 0.0, 0.6, 1.0 };
-	std::vector<double> aY{ 0,  0.3 * 255.0, 1.0 * 255.0 };
+	std::vector<double> aX{ position[0], position[1], position[2], position[3] };
+	std::vector<double> aY{ color1[3], color2[3], color3[3], color4[3] };
 
 	r.set_points(rX, rY);
 	g.set_points(gX, gY);
@@ -152,11 +165,20 @@ unsigned int TransferTableBuilder::getTransfer()
 	return colorTexture.id;
 }
 
-void TransferTableBuilder::setColorsPos(glm::vec3 newColor1, glm::vec3 newColor2, glm::vec3 newColor3, glm::vec3 newColor4, glm::vec4 newPosition)
+void TransferTableBuilder::setColorsPos(glm::vec4 newColor1, glm::vec4 newColor2, glm::vec4 newColor3, glm::vec4 newColor4, glm::vec4 newPosition)
 {
-	color1 = newColor1 * glm::vec3(255.0, 255.0, 255.0);
-	color2 = newColor2 * glm::vec3(255.0, 255.0, 255.0);
-	color3 = newColor3 * glm::vec3(255.0, 255.0, 255.0);
-	color4 = newColor4 * glm::vec3(255.0, 255.0, 255.0);
+	color1 = newColor1 * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color2 = newColor2 * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color3 = newColor3 * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color4 = newColor4 * glm::vec4(255.0, 255.0, 255.0, 255.0);
 	position = newPosition;
+}
+
+void TransferTableBuilder::setColorsPos(glm::vec4 *newColor)
+{
+	color1 = newColor[0] * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color2 = newColor[1] * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color3 = newColor[2] * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color4 = newColor[3] * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	position = newColor[4];
 }

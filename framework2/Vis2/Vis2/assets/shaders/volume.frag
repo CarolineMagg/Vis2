@@ -18,7 +18,8 @@ uniform sampler2DArray mb;
 uniform sampler2DArray debug;
 
 uniform sampler3D volTexture;
-uniform sampler2D colorTransfer;
+uniform sampler2D volumeTransfer;
+uniform sampler2D mediumTransfer;
 
 layout (location = 0) out vec4 vpbOut;
 layout (location = 1) out vec4 vdbOut;
@@ -72,13 +73,11 @@ void main() {
 	int readLayer = 1 - gl_Layer;
 	int writeLayer = gl_Layer;
 
-
 	// PRE
 	//vec4 X = texture(vpb, vec3(TexCoords, readLayer));
 	// LIGHT
 	vec4 ldi = texture(ldb, vec3(TexCoords, readLayer));
 	vec2 lpi_1 = TexCoords - vec2(ldi * planeDistance);
-
 
 	//TODO worldpos geometry shader way or this way??
 	vec3 volumePosLPI_1 = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + lpi_1 - vec2(0.5), currentZVS, 1.0)).xyz + vec3(0.5);
@@ -95,9 +94,9 @@ void main() {
 	// INTEGRATION TABLE LIGHT
 	float volumeX = texture(volTexture, WorldPos).x;
 	float volumeLPI_1 = texture(volTexture, volumePosLPI_1).x;
-	vec4 transfer = texture(colorTransfer, vec2(volumeX, volumeLPI_1));
+	vec4 transfer = texture(volumeTransfer, vec2(volumeX, volumeLPI_1));
 	float alphaL = transfer.w / 20.0;
-	vec3 mL = 1.0 - transfer.xyz * 0.05;
+	vec3 mL = texture(mediumTransfer, vec2(volumeX, volumeLPI_1)).xyz;//1.0 - transfer.xyz * 0.05; // transfer medium lpi_1
 	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL) * vec4(mL, 0.0);
 
 	precise vec3 ref = getRefractionGradient((WorldPos+volumePosLPI_1)/2.0) * planeDistance;
@@ -116,24 +115,25 @@ void main() {
 	float Ai_1 = c.w;
 	vec4 Mi_1 = texture(mb, vec3(TexCoords, readLayer));
 	vec4 id = texture(lb, vec3(TexCoords, readLayer));
-	//vec4 is = vec4(0.0); //TODO: specular component
+	vec4 halfwayDir = normalize(ldi + vdi);
+	vec4 is = vec4(0.0); //TODO: specular component
 
 	// INTEGRATION TABLE VIEW
 	vec4 vpi_1 = vpi - vdi * planeDistance;
 	vec4 vpi_1WorldPos = inverseViewMatrix * vpi_1;
 	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + vec3(0.5, 0.5, 0.5)).x;;		
 	float volumeVPI_1 =  texture(volTexture, vec3(vpi_1WorldPos) + vec3(0.5, 0.5, 0.5)).x;
-	vec4 transferV =  texture(colorTransfer, vec2(volumeX, volumeLPI_1)) ;
+	vec4 transferV =  texture(volumeTransfer, vec2(volumeX, volumeLPI_1)) ;
 	vec3 cV = transferV.xyz;
 	float alphaV = transferV.w;
-	vec3 mV = vec3(1.0) - cV * 0.1;
+	vec3 mV = texture(mediumTransfer, vec2(volumeX, volumeLPI_1)).xyz;//vec3(1.0) - cV * 0.1; // transfer medium vpi_1
 
-	vec3 Ci = Ci_1  + ( 1 - min (1.0, Ai_1))  * Mi_1.xyz * ( alphaV *  cV  * id.xyz); //TODO: add + is.xyz
+	vec3 Ci = Ci_1  + ( 1 - min (1.0, Ai_1))  * Mi_1.xyz * ( alphaV *  cV  * id.xyz + is.xyz); //TODO: add + is.xyz
 	float Ai = Ai_1  + (1- min(1.0,Ai_1)) * alphaV;
 	vec3 Mi = Mi_1.xyz * mV;
 
 	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0), 0.0));
-	vec4 vpi_P1 = vpi + vdi * planeDistance;
+	vec4 vpi_P1 = vpi + vdi_P1 * planeDistance;
 
 	vpbOut = vpi_P1;
 	vdbOut = vdi_P1;
