@@ -9,6 +9,9 @@ uniform float currentZVS;
 uniform vec3 middleOfPlaneVS;
 uniform float sphereRadius;
 
+uniform float shininess;
+uniform float specularCoeff;
+
 uniform sampler2DArray vpb;
 uniform sampler2DArray vdb;
 uniform sampler2DArray lb;
@@ -28,7 +31,6 @@ layout (location = 3) out vec4 ldbOut;
 layout (location = 4) out vec4 cbOut;
 layout (location = 5) out vec4 mbOut;
 layout (location = 6) out vec4 debugOut;
-
 
 void sampleCentralDifferenceValues(vec3 samplePosition, float sampleDistance, out vec3 s1 , out vec3 s2)
 {	
@@ -61,6 +63,18 @@ vec3 getRefractionGradient(vec3 position)
 	s1 = RefractionTransfer(s1);
 	s2 = RefractionTransfer(s2);
 	//vec3 diff = (s1 + s2) / 2.0;
+	vec3 diff = (s2 - s1) ;
+	diff = mat3(viewMatrix) * diff;
+
+	return length(diff) > 0 ? normalize(diff) : vec3(0);
+}
+
+vec3 getVolumeGradient(vec3 position)
+{
+	vec3 s1;
+	vec3 s2;
+	
+	sampleCentralDifferenceValues(position, planeDistance, s1, s2);
 	vec3 diff = (s2 - s1) ;
 	diff = mat3(viewMatrix) * diff;
 
@@ -140,8 +154,9 @@ void main() {
 	float Ai_1 = c.w;
 	vec4 Mi_1 = texture(mb, vec3(TexCoords, readLayer));
 	vec4 id = texture(lb, vec3(TexCoords, readLayer));
-	vec4 halfwayDir = normalize(ldi + vdi);
-	vec4 is = vec4(0.0); //TODO: specular component
+	vec3 halfwayDir = normalize(ldi + vdi).xyz;
+	vec3 normal = getVolumeGradient((WorldPos+volumePosLPI_1)/2.0);	
+	vec3 is = Li.xyz * specularCoeff * pow(max(dot(halfwayDir, normal), 0.0),shininess);//vec4(0.0); //TODO: specular component
 
 	// INTEGRATION TABLE VIEW
 	//vec4 vpi_1 = vpi - vdi * planeDistance;
@@ -183,5 +198,5 @@ void main() {
 	cbOut = vec4(Ci, Ai);
 	mbOut = vec4(Mi, 0.0);
 
-	debugOut = vec4(Ci, Ai);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
+	debugOut = vec4(Ci, Ai);   //vec4(abs(mL.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
 }
