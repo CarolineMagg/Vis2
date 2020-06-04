@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Interactive Dynamic Volume Illumination with Refraction and Caustics</h1>
+
+<hr>
+<style>
+    img {
+      width: 80%;
+    }    
+    hr.new1 {
+    border-top: 1px dashed gray;
+    }
+</style>
+<img src="unnamed.jpg" alt="Teaser">
+
+<hr>
+
+<h2>Description</h2>
+
+This program is an implementation of the paper "Interactive Dynamic Volume Illumination with Refraction and Caustics" by Jens G. Magnus and Stefan Bruckner.
+
+<hr class="new1">
+
+<h2>Program</h2>
+
+The program was implemented in a C++ framework, uses OpenGL 4.4 and therefore needs a Nvidia platform.
+
+<h3>Camera interaction</h3>
+
+By pressing "Tab", the interaction mode can be switched between mouse movement and UI interaction. 
+The mouse movement mode is active, if no mouse cursor is visible.
+
+<h3>User interface</h3>
+
+The user interface was implemented based on AntTweakBar library and has several sections.
+
+<p><b>General</b></p>
+<p>The general section provides a drop down menu to chose the loaded model (see Section Dataset) and the number of slices used for rendering.
+The default model is the skull of a two-toed sloth. Additional models can be loaded with the button "Load additional meshes" but this can take a few minutes.</p>
+
+<p><b>Light</b></p>
+<p>In this section parameters for the light setting can be adapted. The values for the specular reflection constant and the shininess constant can be edited.</p>
+
+<p><b>Volume TF & Medium TF</b></p>
+<p>The transfer function for volume and medium color are defined by four control points.
+    The corresponding RGB and alpha values can be changed. For the medium color, the alpha value won't have any impact for the rendering calculation.
+    The change will be applied once the button "Apply" is pressed to avoid unnecessary calculations.
+    The "Reset" button will reset the values of the transfer function to the inital settings.
+</p>
+
+<p><b>Medium TF</b></p>
+<p>The transfer function for the medium color has also four control points. The RGB colors can be changed</p>
+
+<hr class="new1">
+
+<h2>Dataset</h2>
+
+<p>The volume data used for this program was taken from 
+<a href="http://www.digimorph.org/publications.phtml">Digital Morphology</a> library, an archive providing high-resolution X-ray computed tomography of biological specimens.</p>
+The following datasets have been chosen for the program and can be loaded:
+<ul>
+    <li><a href="http://digimorph.org/specimens/Alligator_mississippiensis/adult/">Alligator mississippiensis</a> - American Alligator</li>
+    <li><a href="http://digimorph.org/specimens/Aspidites_melanocephalus/">Aspidites melanocephalus</a> - Black-headed Python</li>
+    <li><a href="http://www.digimorph.org/specimens/Choloepus_hoffmanni/">Choloepus hoffmanni</a> - Two-toed Sloth (default model)</li>
+    <li><a href="http://www.digimorph.org/specimens/Elseya_dentata/">Elseya dentata</a> - Northern Snapping Turtle</li>
+    <li><a href="http://digimorph.org/specimens/Lama_glama/">Lama glama</a> - Llama </li>
+</ul>
+<div class="row">
+    <img src="alligator.jpg" alt="Alligator" style="width:19%">
+    <img src="python.jpg" alt="Python" style="width:19%">
+    <img src="sloth.jpg" alt="Sloth" style="width:19%">
+    <img src="turtle.jpg" alt="Turtle" style="width:19%">
+    <img src="lama.jpg" alt="Lama" style="width:19%">
+  </div>
+
+<hr class="new1">
+
+<h2>Links</h2>
+
+<ul>
+    <li><a href="https://github.com/CarolineMagg/Vis2">Source Code</a></li>    
+    <li><a href="https://github.com/CarolineMagg/Vis2">Source Documentation</a></li>
+    <li><a href="test.zip">Program</a></li>
+    <li><a href="https://ieeexplore.ieee.org/document/8017622">Original Paper</a></li>
+</ul>
+
+<hr>
+
+<p>Visualization 2 Project by Hamed Jafari-Sahamieh & Caroline Magg</p>
+
+</body>
+</html>
