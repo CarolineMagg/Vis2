@@ -14,24 +14,23 @@ public:
 
 	static unsigned int getColorAlphaTransferTextureStatic();
 	unsigned int getColorAlphaTransferTexture();
-	void setColor1(glm::vec4 newColor);
-	void setColor2(glm::vec4 newColor);
-	void setColor3(glm::vec4 newColor);
-	void setColor4(glm::vec4 newColor);
-	void setPosition(glm::vec4 newPos);
+	unsigned int resetColorAlphaTransferTexture();
 	void setSplines();
 	unsigned int getTransfer();
-	void setColorsPos(glm::vec4 *newColors);
-	void setColorsPos(glm::vec4 newColor1, glm::vec4 newColor2, glm::vec4 newColor3, glm::vec4 newColor4, glm::vec4 newPosition);
-
-
-private:
 
 	glm::vec4 color1;
 	glm::vec4 color2;
 	glm::vec4 color3;
 	glm::vec4 color4;
 	glm::vec4 position;
+
+private:
+
+	glm::vec4 color1Reset;
+	glm::vec4 color2Reset;
+	glm::vec4 color3Reset;
+	glm::vec4 color4Reset;
+	glm::vec4 positionReset;
 	tk::spline r, g, b, a;
 
 };

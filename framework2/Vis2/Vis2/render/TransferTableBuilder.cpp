@@ -5,11 +5,16 @@ TransferTableBuilder::TransferTableBuilder(glm::vec4 newColor1, glm::vec4 newCol
 {
 	std::cout << "Init transfer function " << std::endl;
 	colorTexture.createEmptyTexture(256, 256, 4);
-	color1 = newColor1 * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color2 = newColor2 * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color3 = newColor3 * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color4 = newColor4 * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color1 = newColor1;
+	color2 = newColor2;
+	color3 = newColor3;
+	color4 = newColor4;
 	position = newPosition;
+	color1Reset = color1;
+	color2Reset = color2;
+	color3Reset = color3;
+	color4Reset = color4;
+	positionReset = position;
 	getColorAlphaTransferTexture();
 }
 
@@ -17,11 +22,16 @@ TransferTableBuilder::TransferTableBuilder(glm::vec4 *newColor)
 {
 	std::cout << "Init transfer function " << std::endl;
 	colorTexture.createEmptyTexture(256, 256, 4);
-	color1 = newColor[0] * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color2 = newColor[1] * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color3 = newColor[2] * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color4 = newColor[3] * glm::vec4(255.0, 255.0, 255.0, 255.0);
+	color1 = newColor[0];
+	color2 = newColor[1];
+	color3 = newColor[2];
+	color4 = newColor[3];
 	position = newColor[4];
+	color1Reset = color1;
+	color2Reset = color2;
+	color3Reset = color3;
+	color4Reset = color4;
+	positionReset = position;
 	getColorAlphaTransferTexture();
 }
 
@@ -115,44 +125,29 @@ unsigned int TransferTableBuilder::getColorAlphaTransferTexture()
 	return colorTexture.id;
 }
 
-void TransferTableBuilder::setColor1(glm::vec4 newColor)
+unsigned int TransferTableBuilder::resetColorAlphaTransferTexture()
 {
-	color1 = newColor * glm::vec4(255.0, 255.0, 255.0, 255.0);
-}
-
-void TransferTableBuilder::setColor2(glm::vec4 newColor)
-{
-	color2 = newColor * glm::vec4(255.0, 255.0, 255.0, 255.0);
-}
-
-void TransferTableBuilder::setColor3(glm::vec4 newColor)
-{
-	color3 = newColor * glm::vec4(255.0, 255.0, 255.0, 255.0);
-}
-
-void TransferTableBuilder::setColor4(glm::vec4 newColor)
-{
-	color4 = newColor * glm::vec4(255.0, 255.0, 255.0, 255.0);
-}
-
-void TransferTableBuilder::setPosition(glm::vec4 newPos)
-{
-	position = newPos;
+	color1 = color1Reset;
+	color2 = color2Reset;
+	color3 = color3Reset;
+	color4 = color4Reset;
+	position = positionReset;
+	return getColorAlphaTransferTexture();
 }
 
 void TransferTableBuilder::setSplines()
 {
-	std::vector<double> rX{ position[0], position[1], position[2], position[3] };
-	std::vector<double> rY{ color1[0], color2[0], color3[0], color4[0] };
+	std::vector<double> rX{ position.x, position.y, position.z, position.w };
+	std::vector<double> rY{ color1.x*255.0, color2.x*255.0, color3.x*255.0, color4.x*255.0 };
 
-	std::vector<double> gX{ position[0], position[1], position[2], position[3] };
-	std::vector<double> gY{ color1[1], color2[1], color3[1], color4[1] };
+	std::vector<double> gX{ position.x, position.y, position.z, position.w };
+	std::vector<double> gY{ color1.y*255.0, color2.y*255.0, color3.y*255.0, color4.y*255.0 };
 
-	std::vector<double> bX{ position[0], position[1], position[2], position[3] };
-	std::vector<double> bY{ color1[2], color2[2], color3[2], color4[2] };
+	std::vector<double> bX{ position.x, position.y, position.z, position.w };
+	std::vector<double> bY{ color1.z*255.0, color2.z*255.0, color3.z*255.0, color4.z*255.0 };
 
-	std::vector<double> aX{ position[0], position[1], position[2], position[3] };
-	std::vector<double> aY{ color1[3], color2[3], color3[3], color4[3] };
+	std::vector<double> aX{ position.x, position.y, position.z, position.w };
+	std::vector<double> aY{ color1.w*255.0, color2.w*255.0, color3.w*255.0, color4.w*255.0 };
 
 	r.set_points(rX, rY);
 	g.set_points(gX, gY);
@@ -163,22 +158,4 @@ void TransferTableBuilder::setSplines()
 unsigned int TransferTableBuilder::getTransfer()
 {
 	return colorTexture.id;
-}
-
-void TransferTableBuilder::setColorsPos(glm::vec4 newColor1, glm::vec4 newColor2, glm::vec4 newColor3, glm::vec4 newColor4, glm::vec4 newPosition)
-{
-	color1 = newColor1 * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color2 = newColor2 * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color3 = newColor3 * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color4 = newColor4 * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	position = newPosition;
-}
-
-void TransferTableBuilder::setColorsPos(glm::vec4 *newColor)
-{
-	color1 = newColor[0] * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color2 = newColor[1] * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color3 = newColor[2] * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	color4 = newColor[3] * glm::vec4(255.0, 255.0, 255.0, 255.0);
-	position = newColor[4];
 }
