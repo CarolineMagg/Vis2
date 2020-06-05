@@ -23,6 +23,7 @@ public:
 	void setUniform(const std::string &name, double value) const;
 	void setUniform(const std::string &name, float value1, float value2, float value3, float value4) const;
 	void setUniform(const std::string &name, const glm::vec2 &value) const;
+	void setUniform(const std::string& name, const glm::ivec2& value) const;
 	void setUniform(const std::string &name, float x, float y) const;
 	void setUniform(const std::string &name, const glm::vec3 &value) const;
 	void setUniform(const std::string &name, float x, float y, float z) const;

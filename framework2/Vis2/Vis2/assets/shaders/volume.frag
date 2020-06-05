@@ -8,6 +8,8 @@ uniform float planeDistance;
 uniform float currentZVS;
 uniform vec3 middleOfPlaneVS;
 uniform float sphereRadius;
+uniform ivec2 dims;
+
 
 uniform float shininess;
 uniform float specularCoeff;
@@ -119,19 +121,20 @@ void main() {
 	vec3 WorldPos = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + TexCoords - vec2(0.5), currentZVS, 1.0)).xyz + vec3(0.5);
 
 	// TODO FILTERING
+
 	vec4 Li_1 = texture(lb, vec3(lpi_1, readLayer));
-	Li_1 += texture(lb, vec3(lpi_1 + vec2(1)/512.0, readLayer)) * 0.05;
-	Li_1 += texture(lb, vec3(lpi_1 + vec2(-1)/512.0, readLayer)) * 0.05;
-	Li_1 += texture(lb, vec3(lpi_1 + vec2(1, -1)/512.0, readLayer)) * 0.05;
-	Li_1 += texture(lb, vec3(lpi_1 + vec2(-1, 1)/512.0, readLayer)) * 0.05;
+	Li_1 += texture(lb, vec3(lpi_1 + vec2(1)/dims, readLayer)) * 0.05;
+	Li_1 += texture(lb, vec3(lpi_1 + vec2(-1)/dims, readLayer)) * 0.05;
+	Li_1 += texture(lb, vec3(lpi_1 + vec2(1, -1)/dims, readLayer)) * 0.05;
+	Li_1 += texture(lb, vec3(lpi_1 + vec2(-1, 1)/dims, readLayer)) * 0.05;
 	Li_1 = Li_1 / 1.20;
 	
 	
 	vec4 ldi_1 = texture(ldb, vec3(lpi_1, readLayer));
-	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1,0)/512.0, readLayer)) * 0.25;
-	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(-1,0)/512.0, readLayer))* 0.25;
-	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(0, -1)/512.0, readLayer))* 0.25;
-	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(0, 1)/512.0, readLayer))* 0.25;
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1,0)/dims, readLayer)) * 0.25;
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(-1,0)/dims, readLayer))* 0.25;
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(0, -1)/dims, readLayer))* 0.25;
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(0, 1)/dims, readLayer))* 0.25;
 	ldi_1 = normalize(ldi_1 / 2.0);
 
 	float Si = abs(dFdxFine(TexCoords.x)) * abs(dFdyFine(TexCoords.y));  // DOT CORRECT?
