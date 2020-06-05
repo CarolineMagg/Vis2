@@ -229,6 +229,9 @@ void Shader::setUniform(const std::string &name, float value1, float value2, flo
 	glUniform4f(glGetUniformLocation(ID, name.c_str()), value1, value2, value3, value4);
 }
 //
+void Shader::setUniform(const std::string& name, const glm::ivec2& value) const {
+	glUniform2iv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+}
 void Shader::setUniform(const std::string &name, const glm::vec2 &value) const {
 	glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
 }

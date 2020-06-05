@@ -26,8 +26,8 @@ uniform float sphereRadius;
 uniform vec3 middleOfPlaneVS;
 uniform float planeDistance;
 
-float planeWidth = 512.0;
-float planeHeight = 512.0;
+uniform int planeWidth;
+uniform int planeHeight;
 
 void main() {
   
