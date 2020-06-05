@@ -12,14 +12,59 @@
     hr.new1 {
     border-top: 1px dashed gray;
     }
+    div.a {
+    text-align: justify;
+    }
+    div.b {
+    text-align: center;
+    }
 </style>
-<img src="unnamed.jpg" alt="Teaser">
+<img src="unnamed.jpg" alt="Teaser" style="width:19%">
 
 <hr>
 
 <h2>Description</h2>
 
-This program is an implementation of the paper "Interactive Dynamic Volume Illumination with Refraction and Caustics" by Jens G. Magnus and Stefan Bruckner.
+<p><b>Original paper</b></p>
+<div class="a">
+    
+    <p style="float: right;">
+        <img src="light_viewing_rays.png" alt="Rays" style="height:50%">
+    </p>
+
+    <p>
+        This program is an implementation of the paper "Interactive Dynamic Volume Illumination with Refraction and Caustics" by Jens G. Magnus and Stefan Bruckner.
+        <br>
+        The paper presents a method for interactive rendering of volumetric data by utilizing refraction and caustic effects, 
+        arguing that human perception is capable of reconstructing spatial properties of objects given the presence of distortions caused by refraction. 
+        In comparison to offline rendering methods, no precomputation is necessary. In addition, it is possible to change rendering parameters interactively.
+    </p>
+</div>
+<p>
+    The technique is realized by applying a Semi-Lagrangian scheme to propagate light and viewing rays simultaneously. 
+    The light rays are integrated backward in a plane-by-plane manner. The viewing rays are transmitted forward through the volume.
+    The planes are generated parallel to the image plane.    
+</p>
+
+<p><b>Implementation concept</b></p>
+<div class="a">
+    <p>The concept is based on the described pseudocode and consists of the following steps:</p>
+    <ol>
+        <li>Load models and corresponding transfer functions & initialize all scene parameters like camera and light source.</li>        
+        <li>Create sphere around model and calculate first plane parallel to image plane intersection with this sphere.
+            This plane will be used as reference plane for the plane-by-plane calculations.
+        </li>
+        <li>Initialize 7 framebuffers with 2 layers for light color and direction, viewing ray position and
+            direction, accumulated color and medium buffer and the output buffer by means of a compute shader. 
+            These buffers will be used to read the previous and write the information for the current layer in a ping-pong manner.</li>
+        <li>Perfrom light ray propagation by backward-integration together with light intensity correction and view ray propagation 
+            by forward-integration in every rendering step.</li>
+    </ol>
+    <p>
+        Step 4 is the main part of the program. It splits into light and viewing ray propagation.
+        PUT HERE WHAT FRAGMENT SHADER DOES
+    </p>
+</div>
 
 <hr class="new1">
 
@@ -30,32 +75,48 @@ The program was implemented in a C++ framework, uses OpenGL 4.4 and therefore ne
 <h3>Camera interaction</h3>
 
 By pressing "Tab", the interaction mode can be switched between mouse movement and UI interaction. 
-The mouse movement mode is active, if no mouse cursor is visible.
+The mouse movement mode is active, if no mouse cursor is visible. PUT HERE HOW CAMERA WORKS
 
 <h3>User interface</h3>
 
-The user interface was implemented based on AntTweakBar library and has several sections.
+The user interface was implemented using AntTweakBar library and has several different windows. <br>
 
-<p><b>General</b></p>
-<p>The general section provides a drop down menu to chose the loaded model (see Section Dataset) and the number of slices used for rendering.
-The default model is the skull of a two-toed sloth. Additional models can be loaded with the button "Load additional meshes" but this can take a few minutes.</p>
-
-<p><b>Light</b></p>
-<p>In this section parameters for the light setting can be adapted. The values for the specular reflection constant and the shininess constant can be edited.</p>
+<p><b>Mesh</b></p>
+<div class="a">
+    <p>The general section provides a drop down menu to chose the loaded model (see Section Dataset) and the number of slices used for rendering.
+        The default model is the skull of a two-toed sloth. 
+        Additional models can be loaded with the button "Load additional meshes" but this can take a few minutes.</p>
+    <p>Settings for the specular component can be adapted as well. 
+        The values for the specular reflection constant and the shininess constant can be controlled by changing the respective values.</p>
+</div>
 
 <p><b>Volume TF & Medium TF</b></p>
-<p>The transfer function for volume and medium color are defined by four control points.
-    The corresponding RGB and alpha values can be changed. For the medium color, the alpha value won't have any impact for the rendering calculation.
-    The change will be applied once the button "Apply" is pressed to avoid unnecessary calculations.
-    The "Reset" button will reset the values of the transfer function to the inital settings.
-</p>
+<div class="a">
+    <p>The transfer function for volume and medium color are defined by four control points.
+        The corresponding RGB and alpha values can be changed. For the medium color, the alpha value won't have any impact for the rendering calculation.
+        The change will be applied once the button "Apply" is pressed.
+        The "Reset" button will reset the values of the transfer function to the inital settings.
+    </p>
+</div>
 
-<p><b>Medium TF</b></p>
-<p>The transfer function for the medium color has also four control points. The RGB colors can be changed</p>
+<div class="b">
+    <img src="mesh.jpg" alt="Mesh" style="width:15%">
+    <img src="volumetf.jpg" alt="VolumeTF" style="width:15%">
+    <img src="mediumtf.jpg" alt="MediumTF" style="width:15%">
+</div>
+
+<div class="a">
+    <p>
+        Numerical values can be changed in three different ways. First, the values can be edited by clicking on the field and
+        entering the values via keyboard. Second, the + and - buttons can be used to change the value by a predefined step size.
+        And third, the most right button can be used as slider while keeping the mouse button pressed and move the appearing arrow (counter-)clockwise.
+
+    </p>
+</div>
 
 <hr class="new1">
 
-<h2>Dataset</h2>
+<h2>Data</h2>
 
 <p>The volume data used for this program was taken from 
 <a href="http://www.digimorph.org/publications.phtml">Digital Morphology</a> library, an archive providing high-resolution X-ray computed tomography of biological specimens.</p>
@@ -67,13 +128,13 @@ The following datasets have been chosen for the program and can be loaded:
     <li><a href="http://www.digimorph.org/specimens/Elseya_dentata/">Elseya dentata</a> - Northern Snapping Turtle</li>
     <li><a href="http://digimorph.org/specimens/Lama_glama/">Lama glama</a> - Llama </li>
 </ul>
-<div class="row">
+<div class="b">
     <img src="alligator.jpg" alt="Alligator" style="width:19%">
     <img src="python.jpg" alt="Python" style="width:19%">
     <img src="sloth.jpg" alt="Sloth" style="width:19%">
     <img src="turtle.jpg" alt="Turtle" style="width:19%">
     <img src="lama.jpg" alt="Lama" style="width:19%">
-  </div>
+</div>
 
 <hr class="new1">
 
