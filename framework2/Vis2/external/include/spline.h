@@ -392,7 +392,7 @@ double spline::operator() (double x) const
         // interpolation
         interpol=((m_a[idx]*h + m_b[idx])*h + m_c[idx])*h + m_y[idx];
     }
-    return interpol;
+    return std::max(interpol, 0.0);
 }
 
 

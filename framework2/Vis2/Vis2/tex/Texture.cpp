@@ -113,6 +113,7 @@ unsigned int Texture::load3DTexture(std::string path, int width, int height, int
 		}
 		stbi_image_free(data);
 	}
+	glGenerateMipmap(GL_TEXTURE_3D);
 
 	glBindTexture(GL_TEXTURE_3D, 0);
 	return id;
@@ -142,13 +143,14 @@ unsigned int Texture::createEmptyTexture(int width, int height, int nrChannels)
 		
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	float borderColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexStorage2D(GL_TEXTURE_2D, 1, sizedFormat, width, height);		
+	glTexStorage2D(GL_TEXTURE_2D, 1, sizedFormat, width, height);	
+
 
 	glBindTexture(GL_TEXTURE_2D, 0);	
 	return id;

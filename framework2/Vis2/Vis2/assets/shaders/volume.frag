@@ -24,6 +24,8 @@ uniform sampler3D volTexture;
 uniform sampler2D volumeTransfer;
 uniform sampler2D mediumTransfer;
 
+uniform bool useIi;
+
 layout (location = 0) out vec4 vpbOut;
 layout (location = 1) out vec4 vdbOut;
 layout (location = 2) out vec4 lbOut;
@@ -34,24 +36,29 @@ layout (location = 6) out vec4 debugOut;
 
 void sampleCentralDifferenceValues(vec3 samplePosition, float sampleDistance, out vec3 s1 , out vec3 s2)
 {	
-	s1.x = vec4(texture(volTexture, samplePosition - vec3(sampleDistance,0,0))).r; 
-	s2.x = vec4(texture(volTexture, samplePosition + vec3(sampleDistance,0,0))).r; 
-	s1.y = vec4(texture(volTexture, samplePosition - vec3(0,sampleDistance,0))).r; 
-	s2.y = vec4(texture(volTexture, samplePosition + vec3(0,sampleDistance,0))).r;
-	s1.z = vec4(texture(volTexture, samplePosition + vec3(0,0,sampleDistance))).r;
-	s2.z = vec4(texture(volTexture, samplePosition - vec3(0,0,sampleDistance))).r;	
+	s1.x = texture(volTexture, samplePosition - vec3(sampleDistance,0,0)).r; 
+	s2.x = texture(volTexture, samplePosition + vec3(sampleDistance,0,0)).r; 
+	s1.y = texture(volTexture, samplePosition - vec3(0,sampleDistance,0)).r; 
+	s2.y = texture(volTexture, samplePosition + vec3(0,sampleDistance,0)).r;
+	s1.z = texture(volTexture, samplePosition + vec3(0,0,sampleDistance)).r;
+	s2.z = texture(volTexture, samplePosition - vec3(0,0,sampleDistance)).r;	
 }
 
 float RefractionTransfer(float value)
 {
-	// for now just some linear interpolation bteween 1 and 1.45
-	return (value * (1.45 - 1.0)) / 255 + 1.0;
+	if (value < 0.2)
+		return 2.0;
+	if (value < 0.5)
+		return (value * (1.45 - 1.0)) + 1.0;
+	if (value < 0.7)
+		return (value * (1.65 - 1.45)) + 1.45;
+	
+	return (value * (2.5 - 1.5)) + 1.5;	
 }
 
 vec3 RefractionTransfer(vec3 value)
-{	
-	// for now just some linear interpolation bteween 1 and 1.45
-	return (value * (1.45 - 1.0)) / 255 + 1.0;
+{		
+	return vec3(RefractionTransfer(value.x), RefractionTransfer(value.y), RefractionTransfer(value.z));
 }
 
 vec3 getRefractionGradient(vec3 position)
@@ -96,10 +103,8 @@ void main() {
 	int readLayer = 1 - gl_Layer;
 	int writeLayer = gl_Layer;
 
-	// PRE
-	//vec4 X = texture(vpb, vec3(TexCoords, readLayer));
 	// LIGHT
-	vec4 ldi = texture(ldb, vec3(TexCoords, readLayer));	
+	vec4 ldi = texture(ldb, vec3(TexCoords, readLayer));
 
 	
 	vec2 lpi_1 = intersectPlane(
@@ -108,8 +113,6 @@ void main() {
 		-ldi.xyz,
 		vec3(TexCoords, currentZVS)
 	).xy;
-	
-	
 
 	//TODO worldpos geometry shader way or this way??
 	vec3 volumePosLPI_1 = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + lpi_1 - vec2(0.5), currentZVS + planeDistance, 1.0)).xyz + vec3(0.5);
@@ -117,31 +120,39 @@ void main() {
 
 	// TODO FILTERING
 	vec4 Li_1 = texture(lb, vec3(lpi_1, readLayer));
+	Li_1 += texture(lb, vec3(lpi_1 + vec2(1)/512.0, readLayer)) * 0.05;
+	Li_1 += texture(lb, vec3(lpi_1 + vec2(-1)/512.0, readLayer)) * 0.05;
+	Li_1 += texture(lb, vec3(lpi_1 + vec2(1, -1)/512.0, readLayer)) * 0.05;
+	Li_1 += texture(lb, vec3(lpi_1 + vec2(-1, 1)/512.0, readLayer)) * 0.05;
+	Li_1 = Li_1 / 1.20;
 	
 	
 	vec4 ldi_1 = texture(ldb, vec3(lpi_1, readLayer));
-	/*ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1), readLayer));
-	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(-1), readLayer));
-	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1, -1), readLayer));
-	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(-1, 1), readLayer));
-	ldi_1 = normalize(ldi_1 / 5.0);*/
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1,0)/512.0, readLayer)) * 0.25;
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(-1,0)/512.0, readLayer))* 0.25;
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(0, -1)/512.0, readLayer))* 0.25;
+	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(0, 1)/512.0, readLayer))* 0.25;
+	ldi_1 = normalize(ldi_1 / 2.0);
 
-	float Si = abs(dFdx(TexCoords.x)) * abs(dFdy(TexCoords.y));  // DOT CORRECT?
-	float Si_1 = abs(dFdx(lpi_1.x)) *  abs(dFdy(lpi_1.y));
-	float Ii = 1;//Si_1/Si;
+	float Si = abs(dFdxFine(TexCoords.x)) * abs(dFdyFine(TexCoords.y));  // DOT CORRECT?
+	float Si_1 = abs(dFdxFine(lpi_1.x)) *  abs(dFdyFine(lpi_1.y));
+	
+	float Ii = Si_1/Si; //IC
+
+	if (!useIi) Ii = 1.0;
 
 	// INTEGRATION TABLE LIGHT
 	float volumeX = texture(volTexture, WorldPos).x;
 	float volumeLPI_1 = texture(volTexture, volumePosLPI_1).x;
 	vec4 transfer = texture(volumeTransfer, vec2(volumeX, volumeLPI_1));
-	float alphaL = transfer.w / 20.0;
+	float alphaL = transfer.w;
 	vec3 mL = texture(mediumTransfer, vec2(volumeX, volumeLPI_1)).xyz;//1.0 - transfer.xyz * 0.05; // transfer medium lpi_1
-	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL) * vec4(mL, 0.0);
+	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL);// * vec4(mL, 0.0);
 
 	precise vec3 ref = getRefractionGradient((WorldPos+volumePosLPI_1)/2.0) * planeDistance;
 	ldi = normalize(ldi_1 + (vec4(ref, 0.0)));
 	
-	lbOut = Li;
+	lbOut = vec4(Li.xyz, 1.0);
 	ldbOut = ldi;			
 
 	// VIEW
@@ -167,8 +178,6 @@ void main() {
 		vpi.xyz
 	), 1.0);
 
-
-
 	vec4 vpi_1WorldPos = inverseViewMatrix * vpi_1;
 	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + vec3(0.5, 0.5, 0.5)).x;;		
 	float volumeVPI_1 =  texture(volTexture, vec3(vpi_1WorldPos) + vec3(0.5, 0.5, 0.5)).x;
@@ -177,8 +186,8 @@ void main() {
 	float alphaV = transferV.w;
 	vec3 mV = texture(mediumTransfer, vec2(volumeX, volumeLPI_1)).xyz;//vec3(1.0) - cV * 0.1; // transfer medium vpi_1
 
-	vec3 Ci = Ci_1  + ( 1 - min (1.0, Ai_1))  * Mi_1.xyz * ( alphaV *  cV  * id.xyz + is.xyz); //TODO: add + is.xyz
-	float Ai = Ai_1  + (1- min(1.0,Ai_1)) * alphaV;
+	vec3 Ci = Ci_1  + (1.0 - Ai_1)  /** Mi_1.xyz*/ * ( alphaV *  cV  * id.xyz + is.xyz ); //TODO: add + is.xyz
+	float Ai = Ai_1  + (1.0 - Ai_1) * alphaV;
 	vec3 Mi = Mi_1.xyz * mV;
 
 	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + vec3(0.5, 0.5, 0.5)), 0.0));
@@ -191,12 +200,12 @@ void main() {
 		vpi.xyz
 	), 1.0);
 
-
-
 	vpbOut = vpi_P1;
 	vdbOut = vdi_P1;
 	cbOut = vec4(Ci, Ai);
 	mbOut = vec4(Mi, 0.0);
 
-	debugOut = vec4(Ci, Ai);   //vec4(abs(mL.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
+
+	debugOut = vec4(Ci.xyz, 1.0);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
+		
 }

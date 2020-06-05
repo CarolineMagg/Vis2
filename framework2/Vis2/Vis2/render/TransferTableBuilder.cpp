@@ -42,16 +42,16 @@ unsigned int TransferTableBuilder::getColorAlphaTransferTextureStatic()
 	colorTexture.createEmptyTexture(256, 256, 4);
 
 	std::vector<double> rX{ 0.0, 0.5, 0.8, 1.0 };
-	std::vector<double> rY{ 0, 0, 0, 255 };
+	std::vector<double> rY{ 0, 0, 100, 255 };
 
 	std::vector<double> gX{ 0.0, 0.2, 0.6, 0.8, 1.0 };
-	std::vector<double> gY{ 0, 100, 35, 120, 255 };
+	std::vector<double> gY{ 0, 100, 35, 120, 0 };
 
 	std::vector<double> bX{ 0.0, 0.5, 1.0 };
-	std::vector<double> bY{ 0,  200, 255 };
+	std::vector<double> bY{ 0,  100, 0 };
 
 	std::vector<double> aX{ 0.0, 0.6, 1.0 };
-	std::vector<double> aY{ 0,  0.3 * 255.0, 1.0 * 255.0 };
+	std::vector<double> aY{ 0.0,  0.05 * 255.0, 0.4 * 255.0 };
 
 	tk::spline r, g, b, a;
 	r.set_points(rX, rY);
@@ -86,6 +86,8 @@ unsigned int TransferTableBuilder::getColorAlphaTransferTextureStatic()
 	}
 
 	colorTexture.writeOnTexture(256, 256, imageData);
+
+	//glGenerateTextureMipmap(colorTransfer.id);
 
 	return colorTexture.id;
 }
