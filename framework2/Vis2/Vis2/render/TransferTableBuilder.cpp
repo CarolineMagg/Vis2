@@ -2,6 +2,9 @@
 #include "TransferTableBuilder.h"
 TransferTableBuilder::TransferTableBuilder(int id)
 {
+
+	gCol.reserve(50);
+
 	std::cout << "Init transfer function " << id << std::endl;
 	colorTexture.createEmptyTexture(256, 256, 4);
 	initColorAlphaTransferTexture();
