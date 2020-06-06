@@ -6,7 +6,6 @@
 class Camera {
 public:
 	Camera(float fov, float aspectRatio, float near, float far);
-	Camera(glm::vec3 position, glm::vec3 front, glm::vec3 up);
 	~Camera();
 		
 	void frameUpdate(float deltaT);
@@ -14,46 +13,38 @@ public:
 	void setPosition(const glm::vec3& pos);
 	void setLookAt(const glm::vec3& lookAt);
 	void setFront(const glm::vec3 & newFront);
-	void setSpeed(float newSpeed);
 
 	const glm::vec3& getPosition() const;	
 	const glm::vec3& getFront() const;	
 	const glm::vec3& getUp() const;
 	const glm::mat4& getViewMatrix() const;
 	const glm::mat4& getProjection() const;
-	float getSpeed();
+	const float& getYaw() const;
+	const float& getPitch() const;
 
 	void processKeyInput(GLFWwindow *window, float frameDeltaTime);
-	void processMouseInput(GLFWwindow* window, double xpos, double ypos, float frameDeltaTime);	
-	void resetCamera(glm::vec3 pos, glm::vec3 front, bool isLocked);
+	void processScroll(double yoffset);
+	void autoRotate(float frameDeltaTime);
+	void resetCamera();
 	
 	// Frustum Plane Distances
 	GLfloat nearPlane = 0.1f;
 	GLfloat farPlane = 40.f;
-	GLfloat Zoom;
 
 	glm::vec3 position;
 	glm::vec3 front;
 	glm::vec3 up;
 
-	bool locked = false;
+	float speed = 5.00f;
 
 private:	
 	glm::mat4 viewMatrix;
 	glm::mat4 projection;
 	
-
-	float speed = 2.00f;
-	float mouseSensitivity = 0.05f;
-
-	double lastMouseX = 0;
-	double lastMouseY = 0;
-	bool initMouse = true;
-
-	float pitch = 0.0f;
-	float yaw = -90.0f;
-
+	float pitch;
+	float yaw;
+	float distance;
+	
 	void calculateFront();
 
-	void init();
 };
