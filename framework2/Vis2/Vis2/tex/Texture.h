@@ -19,7 +19,8 @@ public:
 
 	unsigned int loadTexture(std::string path, int width, int height, int nrChannels);
 	unsigned int load3DTexture(std::string path, int width, int height, int nrChannels, int beginIndex, int endIndex, std::string fileType, int numLength);
-	unsigned int createEmptyTexture(int width, int height, int nrChannels);
+	unsigned int createEmptyTexture(int width, int height, int nrChannels, int tSizedFormat = -1);
+	unsigned int createEmptyCubeTexture(int width, int height, int nrChannels, int tSizedFormat = -1);
 	void writeOnTexture(unsigned int x, unsigned int y, float value);
 	void writeOnTexture(unsigned int x, unsigned int y, glm::vec3 value);
 	void writeOnTexture(unsigned width, unsigned int height, unsigned char* data);

@@ -21,7 +21,7 @@ public:
 	void setActive(bool doClear = true);
 	void changeSize(unsigned int width, unsigned int height);
 		
-	void bindColorTextureAsImageUnit(unsigned int index, unsigned int bindIndex = 0);
+	void bindColorTextureAsImageUnit(unsigned int index, unsigned int bindIndex = 0, int option = GL_WRITE_ONLY);
 	void bindAllColorTexturesAsImageUnits();
 
 	static unsigned int MULTI_SAMPLE_COUNT;

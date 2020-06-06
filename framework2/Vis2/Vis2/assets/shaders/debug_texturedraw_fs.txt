@@ -14,30 +14,13 @@ uniform float far_plane;
 
 uniform int glLayer;
 
-float LinearizeDepth(float depth)
-{
-    float z = depth * 2.0 - 1.0; // Back to NDC 
-    return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));	
-}
-
-// TESTING SHADER: Modify return values as needed
-
 void main()
-{             
-    //float depthValue = texture(depthMap2, TexCoords).r;   
-    //FragColor = vec4(vec3(LinearizeDepth(depthValue) / far_plane), 1.0); // perspective
-    
-	//main^^^^^^
-	//FragColor = vec4(vec3(depthValue), 1.0); // orthographic
-
-	//test
-	
-
+{  
      vec4 res = texture(depthMap2, vec3(TexCoords,glLayer));// + texture(depthMap2, vec3(TexCoords,1));
+     if (length(res.xyz) < 0.001)
+        discard;
 
-     //vec4 res = vec4(texture(tex3, TexCoords).xwww);
+     //vec4 res = vec4(texture(tex3, TexCoords).xyz,1);
 
      FragColor = res;
-
 }
-

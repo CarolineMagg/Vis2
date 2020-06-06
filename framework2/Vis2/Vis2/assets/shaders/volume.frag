@@ -68,12 +68,6 @@ float RefractionTransfer(float value)
 	return (value * (1.8 - 1.45)) + 1.45;	
 }
 
-
-float RefractionTransferSpecular(float value)
-{		
-	return (value * (1.8 - 1.0)) + 1.0;
-}
-
 vec3 RefractionTransfer(vec3 value)
 {		
 	return vec3(RefractionTransfer(value.x), RefractionTransfer(value.y), RefractionTransfer(value.z));
@@ -166,7 +160,7 @@ void main() {
 	vec4 transfer = texture(volumeTransfer, vec2(volumeX, volumeLPI_1));
 	float alphaL = transfer.w;
 	vec3 mL = texture(mediumTransfer, vec2(volumeX, volumeLPI_1)).xyz;//1.0 - transfer.xyz * 0.05; // transfer medium lpi_1
-	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL);// * vec4(mL, 0.0);
+	vec4 Li = Li_1 * Ii *  abs(1.0 - alphaL) * vec4( vec3(0.99) + transfer.xyz * 0.01,1);
 
 	precise vec3 ref = getRefractionGradient((WorldPos+volumePosLPI_1)/2.0) * planeDistance;
 	ldi = normalize(ldi_1 + (vec4(ref, 0.0)));
@@ -242,5 +236,5 @@ void main() {
 	cbOut = vec4(Ci, Ai);
 	mbOut = vec4(Mi, 0.0);
 	
-	debugOut = vec4(Ci, 1.0);		
+	debugOut = vec4(Ci.xyz, 1.0);		
 }

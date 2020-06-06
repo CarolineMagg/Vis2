@@ -122,7 +122,7 @@ unsigned int Texture::load3DTexture(std::string path, int width, int height, int
 	return id;
 }
 
-unsigned int Texture::createEmptyTexture(int width, int height, int nrChannels)
+unsigned int Texture::createEmptyTexture(int width, int height, int nrChannels, int tSizedFormat)
 {
 	this->width = width;
 	this->height = height;
@@ -131,15 +131,15 @@ unsigned int Texture::createEmptyTexture(int width, int height, int nrChannels)
 	GLenum sizedFormat;
 	if (nrChannels == 1) {
 		format = GL_RED;
-		sizedFormat = GL_R8;
+		sizedFormat = tSizedFormat == -1 ? GL_R8 : tSizedFormat;
 	}
 	else if (nrChannels == 3) {
 		format = GL_RGB;
-		sizedFormat = GL_RGB8;
+		sizedFormat = tSizedFormat == -1 ? GL_RGB8 : tSizedFormat;
 	}
 	else if (nrChannels == 4) {
 		format = GL_RGBA;
-		sizedFormat = GL_RGBA8;
+		sizedFormat = tSizedFormat == -1 ? GL_RGBA8 : tSizedFormat;
 	}
 	else
 		cout << "Unsupported Texture format!" << endl;
@@ -156,6 +156,43 @@ unsigned int Texture::createEmptyTexture(int width, int height, int nrChannels)
 
 
 	glBindTexture(GL_TEXTURE_2D, 0);	
+	return id;
+}
+
+unsigned int Texture::createEmptyCubeTexture(int width, int height, int nrChannels, int tSizedFormat)
+{
+	this->width = width;
+	this->height = height;
+	this->nrChannels = nrChannels;
+
+	GLenum sizedFormat;
+	if (nrChannels == 1) {
+		format = GL_RED;
+		sizedFormat = tSizedFormat == -1 ? GL_R8 : tSizedFormat;
+	}
+	else if (nrChannels == 3) {
+		format = GL_RGB;
+		sizedFormat = tSizedFormat == -1 ? GL_RGB8 : tSizedFormat;
+	}
+	else if (nrChannels == 4) {
+		format = GL_RGBA;
+		sizedFormat = tSizedFormat == -1 ? GL_RGBA8 : tSizedFormat;
+	}
+	else
+		cout << "Unsupported Texture format!" << endl;
+
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	float borderColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	glTexParameterfv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BORDER_COLOR, borderColor);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, sizedFormat, width, height);
+
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	return id;
 }
 

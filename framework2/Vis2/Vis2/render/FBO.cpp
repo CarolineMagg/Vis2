@@ -66,18 +66,16 @@ void FBO::createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, 
 				}
 				else
 				{
-					glBindTexture(GL_TEXTURE_2D, colorTextures.at(i));
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+					glBindTexture(GL_TEXTURE_2D, colorTextures.at(i));					
+					glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, width, height);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-					glBindTexture(GL_TEXTURE_2D, 0);
-					glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorTextures.at(i), 0);
+					float borderColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+					glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, borderColor);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+					glBindTexture(GL_TEXTURE_2D, 0);					
 				}
-				
-				
-				
 			}
 		}
 	}
@@ -137,7 +135,7 @@ void FBO::createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "ERROR - FRAMEBUFFER is not completed!" << std::endl;
 
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -181,9 +179,9 @@ void FBO::copyFBO(unsigned int from, const FBO& to, unsigned int bufferMask) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FBO::bindColorTextureAsImageUnit(unsigned int index, unsigned int bindIndex)
+void FBO::bindColorTextureAsImageUnit(unsigned int index, unsigned int bindIndex, int option)
 {
-	glBindImageTexture(bindIndex, getColorTexture(index), 0, layers > 1 ? GL_TRUE : GL_FALSE, layers, GL_WRITE_ONLY, GL_RGBA32F);
+	glBindImageTexture(bindIndex, getColorTexture(index), 0, layers > 1 ? GL_TRUE : GL_FALSE, layers, option, GL_RGBA32F);
 }
 
 void FBO::bindAllColorTexturesAsImageUnits()

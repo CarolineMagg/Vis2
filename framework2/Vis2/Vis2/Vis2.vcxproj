@@ -175,13 +175,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\debug_texturedraw.geom" />
+    <None Include="assets\shaders\envmap.comp" />
     <None Include="assets\shaders\volume.frag" />
     <None Include="assimp-vc140-mt.dll" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="assets\shaders\base_vs.txt" />
-    <Text Include="assets\shaders\basic_render_fs.txt" />
-    <Text Include="assets\shaders\basic_render_vs.txt" />
+    <Text Include="assets\shaders\basic_render.frag" />
+    <Text Include="assets\shaders\basic_render.vert" />
     <Text Include="assets\shaders\debug_texturedraw_fs.txt" />
     <Text Include="assets\shaders\debug_texturedraw_vs.txt" />
     <Text Include="assets\shaders\volume.comp" />
