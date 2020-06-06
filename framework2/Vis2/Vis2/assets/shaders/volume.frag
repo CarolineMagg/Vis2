@@ -209,8 +209,9 @@ void main() {
 		vec3 normal = -getVolumeGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + vec3(0.5));	
 		float refractionPlaneDiff = max(abs(RefractionTransfer(volumeVPI_1) - RefractionTransfer(volumeVPI)) - 0.15, 0.0);
 	
-	
 		is =  id.xyz * refractionPlaneDiff * pow(max(dot(halfwayDir, normal), 0.0),shininess);//vec4(0.0); //TODO: specular component
+
+		is = is * (1 - length(   (abs(dFdxFine(is)) + abs(dFdyFine(is))) / 2.0  ));
 	}
 
 	vec3 cV = transferV.xyz;
