@@ -26,13 +26,12 @@ uniform float sphereRadius;
 uniform vec3 middleOfPlaneVS;
 uniform float planeDistance;
 
-uniform int planeWidth;
-uniform int planeHeight;
+uniform float planeWidth;
+uniform float planeHeight;
 
 void main() {
   
-  ivec3 pixel_coords = ivec3(gl_GlobalInvocationID.xyz);
-  vec4 pixel = vec4(1.0f, 1.0f,  1.0f, 1.0f);
+  ivec3 pixel_coords = ivec3(gl_GlobalInvocationID.xyz);  
   
   vec3 pixelPos = middleOfPlaneVS + vec3(-0.5 + pixel_coords.x/planeWidth, -0.5 + pixel_coords.y/planeHeight, 0);
   
@@ -41,9 +40,9 @@ void main() {
   //pixelPos.z += dither;
 
   imageStore(vpb, pixel_coords, vec4(pixelPos,1.0));
-  imageStore(vdb, pixel_coords, vec4(normalize(pixelPos.xyz), 0.0));
+  imageStore(vdb, pixel_coords, vec4(0.0,0.0,-1.0, 0.0));
   imageStore(lb, pixel_coords, vec4(lightColor, 1.0));
-  imageStore(ldb, pixel_coords, vec4(normalize(pixelPos-lightVSPos), 0.0));
+  imageStore(ldb, pixel_coords, vec4(normalize(middleOfPlaneVS-lightVSPos), 0.0));
   imageStore(mb, pixel_coords, vec4(1.0));
   imageStore(cb, pixel_coords, vec4(0.0));
 }

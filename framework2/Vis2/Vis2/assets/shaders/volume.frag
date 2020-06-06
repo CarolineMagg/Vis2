@@ -27,6 +27,8 @@ uniform sampler2D volumeTransfer;
 uniform sampler2D mediumTransfer;
 
 uniform bool useIi;
+uniform bool useSpec;
+uniform bool useVRayRefraction;
 
 layout (location = 0) out vec4 vpbOut;
 layout (location = 1) out vec4 vdbOut;
@@ -36,26 +38,40 @@ layout (location = 4) out vec4 cbOut;
 layout (location = 5) out vec4 mbOut;
 layout (location = 6) out vec4 debugOut;
 
+
+/*s1.x = textureLod(volTexture, samplePosition - vec3(sampleDistance,0,0), lod).r; 
+	s2.x = textureLod(volTexture, samplePosition + vec3(sampleDistance,0,0), lod).r; 
+	s1.y = textureLod(volTexture, samplePosition - vec3(0,sampleDistance,0), lod).r; 
+	s2.y = textureLod(volTexture, samplePosition + vec3(0,sampleDistance,0), lod).r;
+	s1.z = textureLod(volTexture, samplePosition + vec3(0,0,sampleDistance), lod).r;
+	s2.z = textureLod(volTexture, samplePosition - vec3(0,0,sampleDistance), lod).r;	*/
+
 void sampleCentralDifferenceValues(vec3 samplePosition, float sampleDistance, out vec3 s1 , out vec3 s2)
 {	
 	s1.x = texture(volTexture, samplePosition - vec3(sampleDistance,0,0)).r; 
 	s2.x = texture(volTexture, samplePosition + vec3(sampleDistance,0,0)).r; 
 	s1.y = texture(volTexture, samplePosition - vec3(0,sampleDistance,0)).r; 
 	s2.y = texture(volTexture, samplePosition + vec3(0,sampleDistance,0)).r;
-	s1.z = texture(volTexture, samplePosition + vec3(0,0,sampleDistance)).r;
-	s2.z = texture(volTexture, samplePosition - vec3(0,0,sampleDistance)).r;	
+	s1.z = texture(volTexture, samplePosition - vec3(0,0,sampleDistance)).r;
+	s2.z = texture(volTexture, samplePosition + vec3(0,0,sampleDistance)).r;	
 }
 
 float RefractionTransfer(float value)
 {
-	if (value < 0.2)
-		return 2.0;
+	if (value < 0.25)
+		return 1.0;
 	if (value < 0.5)
-		return (value * (1.45 - 1.0)) + 1.0;
+		return (value * (1.35 - 1.0)) + 1.0;
 	if (value < 0.7)
-		return (value * (1.65 - 1.45)) + 1.45;
+		return (value * (1.45 - 1.35)) + 1.35;
 	
-	return (value * (2.5 - 1.5)) + 1.5;	
+	return (value * (1.8 - 1.45)) + 1.45;	
+}
+
+
+float RefractionTransferSpecular(float value)
+{		
+	return (value * (1.8 - 1.0)) + 1.0;
 }
 
 vec3 RefractionTransfer(vec3 value)
@@ -85,7 +101,7 @@ vec3 getVolumeGradient(vec3 position)
 	
 	sampleCentralDifferenceValues(position, planeDistance, s1, s2);
 	vec3 diff = (s2 - s1) ;
-	diff = mat3(viewMatrix) * diff;
+	diff = inverse(transpose(mat3(viewMatrix))) * diff;
 
 	return length(diff) > 0 ? normalize(diff) : vec3(0);
 }
@@ -168,9 +184,7 @@ void main() {
 	float Ai_1 = c.w;
 	vec4 Mi_1 = texture(mb, vec3(TexCoords, readLayer));
 	vec4 id = texture(lb, vec3(TexCoords, readLayer));
-	vec3 halfwayDir = normalize(ldi + vdi).xyz;
-	vec3 normal = getVolumeGradient((WorldPos+volumePosLPI_1)/2.0);	
-	vec3 is = Li.xyz * specularCoeff * pow(max(dot(halfwayDir, normal), 0.0),shininess);//vec4(0.0); //TODO: specular component
+	
 
 	// INTEGRATION TABLE VIEW
 	//vec4 vpi_1 = vpi - vdi * planeDistance;
@@ -182,20 +196,39 @@ void main() {
 	), 1.0);
 
 	vec4 vpi_1WorldPos = inverseViewMatrix * vpi_1;
-	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + vec3(0.5, 0.5, 0.5)).x;;		
-	float volumeVPI_1 =  texture(volTexture, vec3(vpi_1WorldPos) + vec3(0.5, 0.5, 0.5)).x;
-	vec4 transferV =  texture(volumeTransfer, vec2(volumeX, volumeLPI_1)) ;
+	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + vec3(0.5)).x;;		
+	float volumeVPI_1 =  texture(volTexture, vec3(vpi_1WorldPos) + vec3(0.5)).x;
+	vec4 transferV =  texture(volumeTransfer, vec2(volumeVPI, volumeVPI_1)) ;
+
+	vec3 refractionView = getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + vec3(0.5));
+
+	vec3 is = vec3(0);
+	if (useSpec) 
+	{
+		vec3 halfwayDir = normalize(-ldi + vdi).xyz;
+		vec3 normal = -getVolumeGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + vec3(0.5));	
+		float refractionPlaneDiff = max(abs(RefractionTransfer(volumeVPI_1) - RefractionTransfer(volumeVPI)) - 0.15, 0.0);
+	
+	
+		is =  id.xyz * refractionPlaneDiff * pow(max(dot(halfwayDir, normal), 0.0),shininess);//vec4(0.0); //TODO: specular component
+	}
+
 	vec3 cV = transferV.xyz;
 	float alphaV = transferV.w;
-	vec3 mV = texture(mediumTransfer, vec2(volumeX, volumeLPI_1)).xyz;//vec3(1.0) - cV * 0.1; // transfer medium vpi_1
+	vec3 mV = texture(mediumTransfer, vec2(volumeVPI, volumeVPI_1)).xyz;//vec3(1.0) - cV * 0.1; // transfer medium vpi_1
 
 	vec3 Ci = Ci_1  + (1.0 - Ai_1)  /** Mi_1.xyz*/ * ( alphaV *  cV  * id.xyz + is.xyz ); //TODO: add + is.xyz
 	float Ai = Ai_1  + (1.0 - Ai_1) * alphaV;
 	vec3 Mi = Mi_1.xyz * mV;
 
-	vec4 vdi_P1 = normalize(vdi + planeDistance * vec4(getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + vec3(0.5, 0.5, 0.5)), 0.0));
+	vec4 vdi_P1 = vdi;
+	if (useVRayRefraction)
+	{
+		vdi_P1 = normalize(vdi + planeDistance * vec4(refractionView, 0.0));
+	}
 	
-	//vec4 vpi_P1 = vpi + vdi_P1 * planeDistance;
+	
+	//vec4 vpi_P2 = vpi + vdi_P1 * planeDistance;
 	vec4 vpi_P1 = vec4(intersectPlane(
 		vec3(0,0,-1),
 		vec3(0, 0, currentZVS - planeDistance),
@@ -207,8 +240,6 @@ void main() {
 	vdbOut = vdi_P1;
 	cbOut = vec4(Ci, Ai);
 	mbOut = vec4(Mi, 0.0);
-
-
-	debugOut = vec4(Ci.xyz, 1.0);   //vec4(abs(ref.xyz),1);//vec4(mL, alphaL, Ii, 1.0);//abs(Li);		
-		
+	
+	debugOut = vec4(Ci, 1.0);		
 }

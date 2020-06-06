@@ -71,6 +71,9 @@ unsigned int Texture::load3DTexture(std::string path, int width, int height, int
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_ANISOTROPY, 8.0);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_LOD_BIAS, -1.0);
 		
 	GLenum sizedFormat;
 	
