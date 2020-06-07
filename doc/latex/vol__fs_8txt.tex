@@ -1,0 +1,134 @@
+\hypertarget{vol__fs_8txt}{}\doxysection{assets/shaders/vol\+\_\+fs.txt File Reference}
+\label{vol__fs_8txt}\index{assets/shaders/vol\_fs.txt@{assets/shaders/vol\_fs.txt}}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{vol__fs_8txt_af0b23eedf2352de4c1eff77e1401730c}{N\+U\+M\+\_\+\+S\+A\+M\+P\+L\+ES}}~64
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+vec3 \mbox{\hyperlink{vol__fs_8txt_abd59e94bf6cf7c9b01c9a600f0fead85}{calculate\+World\+Pos}} (float depth)
+\item 
+float \mbox{\hyperlink{vol__fs_8txt_a849f48706a93d7d77316eabe196f1ea3}{cast\+Ray\+To\+Frag}} (vec3 frag\+Pos)
+\item 
+void \mbox{\hyperlink{vol__fs_8txt_acdef7a1fd863a6d3770c1268cb06add3}{main}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+float \mbox{\hyperlink{vol__fs_8txt_a4fd17171ba098436dde4a9e6692fa6a9}{dither\+\_\+pattern}} \mbox{[}16\mbox{]}
+\item 
+in vec2 \mbox{\hyperlink{vol__fs_8txt_a58b0e682d807370a92bb4b37474353a5}{Tex\+Coords}}
+\item 
+out vec4 \mbox{\hyperlink{vol__fs_8txt_af5639df2ce0dea4170bb8b47a599911e}{Frag\+Color}}
+\item 
+uniform mat4 \mbox{\hyperlink{vol__fs_8txt_a5b4a0b2b0eea9ca3b461a2cb7d9ac479}{inverse\+View}}
+\item 
+uniform mat4 \mbox{\hyperlink{vol__fs_8txt_ad8f5fdc43238bd1a1347b0689d3a1077}{inverse\+Projection}}
+\item 
+uniform vec3 \mbox{\hyperlink{vol__fs_8txt_a3247020695737a20a1e53b6b987c2fb5}{view\+Pos}}
+\item 
+uniform sampler2D \mbox{\hyperlink{vol__fs_8txt_ad5bf7b872c6ece6b1a3d52c58fb840c1}{scene\+Depth}}
+\item 
+uniform sampler3D \mbox{\hyperlink{vol__fs_8txt_abf36ee8a9a6af9ee94b0f988c42b3919}{vol\+Texture}}
+\item 
+float \mbox{\hyperlink{vol__fs_8txt_ad1109c8b740faff93da025597b7abf79}{z\+Ratio}} = 0.\+2409f / 0.\+1284f
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{vol__fs_8txt_af0b23eedf2352de4c1eff77e1401730c}\label{vol__fs_8txt_af0b23eedf2352de4c1eff77e1401730c}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!NUM\_SAMPLES@{NUM\_SAMPLES}}
+\index{NUM\_SAMPLES@{NUM\_SAMPLES}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{NUM\_SAMPLES}{NUM\_SAMPLES}}
+{\footnotesize\ttfamily \#define N\+U\+M\+\_\+\+S\+A\+M\+P\+L\+ES~64}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{vol__fs_8txt_abd59e94bf6cf7c9b01c9a600f0fead85}\label{vol__fs_8txt_abd59e94bf6cf7c9b01c9a600f0fead85}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!calculateWorldPos@{calculateWorldPos}}
+\index{calculateWorldPos@{calculateWorldPos}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{calculateWorldPos()}{calculateWorldPos()}}
+{\footnotesize\ttfamily vec3 calculate\+World\+Pos (\begin{DoxyParamCaption}\item[{float}]{depth }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{vol__fs_8txt_a849f48706a93d7d77316eabe196f1ea3}\label{vol__fs_8txt_a849f48706a93d7d77316eabe196f1ea3}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!castRayToFrag@{castRayToFrag}}
+\index{castRayToFrag@{castRayToFrag}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{castRayToFrag()}{castRayToFrag()}}
+{\footnotesize\ttfamily float cast\+Ray\+To\+Frag (\begin{DoxyParamCaption}\item[{vec3}]{frag\+Pos }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{vol__fs_8txt_acdef7a1fd863a6d3770c1268cb06add3}\label{vol__fs_8txt_acdef7a1fd863a6d3770c1268cb06add3}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!main@{main}}
+\index{main@{main}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily void main (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{vol__fs_8txt_a4fd17171ba098436dde4a9e6692fa6a9}\label{vol__fs_8txt_a4fd17171ba098436dde4a9e6692fa6a9}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!dither\_pattern@{dither\_pattern}}
+\index{dither\_pattern@{dither\_pattern}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{dither\_pattern}{dither\_pattern}}
+{\footnotesize\ttfamily float dither\+\_\+pattern\mbox{[}16\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{= \textcolor{keywordtype}{float}[16] (}
+\DoxyCodeLine{    0.0f, 0.5f, 0.125f, 0.625f,}
+\DoxyCodeLine{    0.75f, 0.22f, 0.875f, 0.375f,}
+\DoxyCodeLine{    0.1875f, 0.6875f, 0.0625f, 0.5625,}
+\DoxyCodeLine{    0.9375f, 0.4375f, 0.8125f, 0.3125}
+\DoxyCodeLine{)}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{vol__fs_8txt_af5639df2ce0dea4170bb8b47a599911e}\label{vol__fs_8txt_af5639df2ce0dea4170bb8b47a599911e}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!FragColor@{FragColor}}
+\index{FragColor@{FragColor}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{FragColor}{FragColor}}
+{\footnotesize\ttfamily out vec4 Frag\+Color}
+
+\mbox{\Hypertarget{vol__fs_8txt_ad8f5fdc43238bd1a1347b0689d3a1077}\label{vol__fs_8txt_ad8f5fdc43238bd1a1347b0689d3a1077}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!inverseProjection@{inverseProjection}}
+\index{inverseProjection@{inverseProjection}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{inverseProjection}{inverseProjection}}
+{\footnotesize\ttfamily uniform mat4 inverse\+Projection}
+
+\mbox{\Hypertarget{vol__fs_8txt_a5b4a0b2b0eea9ca3b461a2cb7d9ac479}\label{vol__fs_8txt_a5b4a0b2b0eea9ca3b461a2cb7d9ac479}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!inverseView@{inverseView}}
+\index{inverseView@{inverseView}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{inverseView}{inverseView}}
+{\footnotesize\ttfamily uniform mat4 inverse\+View}
+
+\mbox{\Hypertarget{vol__fs_8txt_ad5bf7b872c6ece6b1a3d52c58fb840c1}\label{vol__fs_8txt_ad5bf7b872c6ece6b1a3d52c58fb840c1}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!sceneDepth@{sceneDepth}}
+\index{sceneDepth@{sceneDepth}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{sceneDepth}{sceneDepth}}
+{\footnotesize\ttfamily uniform sampler2D scene\+Depth}
+
+\mbox{\Hypertarget{vol__fs_8txt_a58b0e682d807370a92bb4b37474353a5}\label{vol__fs_8txt_a58b0e682d807370a92bb4b37474353a5}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!TexCoords@{TexCoords}}
+\index{TexCoords@{TexCoords}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{TexCoords}{TexCoords}}
+{\footnotesize\ttfamily in vec2 Tex\+Coords}
+
+\mbox{\Hypertarget{vol__fs_8txt_a3247020695737a20a1e53b6b987c2fb5}\label{vol__fs_8txt_a3247020695737a20a1e53b6b987c2fb5}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!viewPos@{viewPos}}
+\index{viewPos@{viewPos}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{viewPos}{viewPos}}
+{\footnotesize\ttfamily uniform vec3 view\+Pos}
+
+\mbox{\Hypertarget{vol__fs_8txt_abf36ee8a9a6af9ee94b0f988c42b3919}\label{vol__fs_8txt_abf36ee8a9a6af9ee94b0f988c42b3919}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!volTexture@{volTexture}}
+\index{volTexture@{volTexture}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{volTexture}{volTexture}}
+{\footnotesize\ttfamily uniform sampler3D vol\+Texture}
+
+\mbox{\Hypertarget{vol__fs_8txt_ad1109c8b740faff93da025597b7abf79}\label{vol__fs_8txt_ad1109c8b740faff93da025597b7abf79}} 
+\index{vol\_fs.txt@{vol\_fs.txt}!zRatio@{zRatio}}
+\index{zRatio@{zRatio}!vol\_fs.txt@{vol\_fs.txt}}
+\doxysubsubsection{\texorpdfstring{zRatio}{zRatio}}
+{\footnotesize\ttfamily float z\+Ratio = 0.\+2409f / 0.\+1284f}
+
