@@ -12,75 +12,121 @@ uniform vec3 lightVSPos;
 uniform vec3 lightColor;
 
 uniform mat4 viewMatrix;
-uniform vec4 viewPos;
-uniform vec3 viewDir;
+uniform mat4 inverseViewMatrix;
+
 uniform float sphereRadius;
 uniform vec3 middleOfPlaneVS;
-uniform float planeDistance;
-
 uniform vec3 middleOfPlaneVSOpp;
 
 uniform float planeWidth;
 uniform float planeHeight;
 
-uniform float planeLeft;
+layout(location = 100) uniform mat4 fl;
+layout(location = 101) uniform mat4 fl1;
+layout(location = 102) uniform mat4 fl2;
+layout(location = 103) uniform mat4 fl3;
+layout(location = 104) uniform mat4 fl4;
+layout(location = 105) uniform mat4 fl5;
 
-float boxSize = 2.0;
+float boxSize = 1.0;
 
 
-vec3 intersectPlane(vec3 n, vec3 p0, vec3 r, vec3 r0)
+vec3 intersectPlane(vec3 n, vec3 p0, vec3 r, vec3 r0, out float t)
 {
 	float d = dot(n, r);
-	//if (abs(d) < 1e-6) return r0;
-	//float t = dot((p0-r0), n) / d;
-	float t = -(dot(p0 - r0, n) ) / d;
+	if (d < 1e-6) {
+		t = 0;
+		return r0;
+	}
+	t = dot((p0-r0), n) / d;	
+
 	return r0 + r * t;
 }
 
 void main() {
   
   ivec3 pixel_coords = ivec3(gl_GlobalInvocationID.xyz);  
-  
-  vec3 pixelPos = middleOfPlaneVSOpp + vec3(-0.5 + pixel_coords.x/planeWidth, -0.5 + pixel_coords.y/planeHeight, 0);  
+  float t;
+  vec3 pixelPos = vec3(inverseViewMatrix * vec4(middleOfPlaneVSOpp + vec3(-0.5 + pixel_coords.x/planeWidth, -0.5 + pixel_coords.y/planeHeight, 0), 1.0));
   
     
   vec4 light = imageLoad(lb, pixel_coords);
-  vec4 lightdir = imageLoad(ldb, pixel_coords);
-
+  vec3 lightdir = normalize(mat3(inverseViewMatrix) * imageLoad(ldb, pixel_coords).xyz);
   
-  vec3 posXNormal = vec3(-1,0,0);
+    
   vec3 posXIntersect = intersectPlane(
-		posXNormal,
+		vec3(1.0,0.0,0.0),
 		vec3(boxSize/2.0, 0, 0),
-		vec3(inverse(viewMatrix) * lightdir),
-		vec3(inverse(viewMatrix) * vec4(pixelPos,1))
+		lightdir,
+		pixelPos,
+		t
 	);
-	ivec2 TexC = ivec2(posXIntersect.x * planeWidth, posXIntersect.y * planeHeight);
+	vec4 pos = vec4(0);	
+	if (t != 0) {
+		pos = fl * vec4(posXIntersect, 1);	
+		imageStore(results, ivec3(planeWidth /2+ planeWidth*pos.xy, 0), light);
+	}
+			
+	vec3 negXIntersect = intersectPlane(
+		vec3(-1.0,0.0,0.0),
+		vec3(-boxSize/2.0, 0, 0),
+		lightdir,
+		pixelPos,
+		t
+	);	
+	if (t != 0) {
+		pos = fl1 * vec4(negXIntersect, 1);	
+		imageStore(results, ivec3(planeWidth /2+ planeWidth*pos.xy, 1), light);
+	}
 
+	vec3 posYIntersect = intersectPlane(
+		vec3(0.0,1.0,0.0),
+		vec3(0.0,boxSize/2.0, 0),
+		lightdir,
+		pixelPos,
+		t
+	);	
+	if (t != 0) {
+		pos = fl2 * vec4(posYIntersect, 1);	
+		imageStore(results, ivec3(planeWidth /2+ planeWidth*pos.xy, 2), light);
+	}
+
+	vec3 negYIntersect = intersectPlane(
+		vec3(0.0,-1.0,0.0),
+		vec3(0.0,-boxSize/2.0, 0),
+		lightdir,
+		pixelPos,
+		t
+	);	
+	if (t != 0) {
+		pos = fl3 * vec4(negYIntersect, 1);	
+		imageStore(results, ivec3(planeWidth /2+ planeWidth*pos.xy, 3), light);
+	}
 	
-	imageStore(results, ivec3(TexC, 0), light);
-
-	vec3 posZNormal = normalize(transpose(inverse(mat3(viewMatrix))) * vec3(0,0,-1));
 	vec3 posZIntersect = intersectPlane(
-		posZNormal,
-		vec3(viewMatrix * vec4(0, 0, boxSize/2.0, 1)),
-		vec3(lightdir),
-		pixelPos
+		vec3(0,0,1.0),
+		vec3(0, 0, boxSize/2.0),
+		lightdir,
+		pixelPos,
+		t
 	);
-	TexC = ivec2(posZIntersect.x * planeWidth, posZIntersect.y * planeHeight);
-	if (all(greaterThan(posZIntersect.xy, vec2(0.0))) && all(lessThan(posZIntersect.xy, vec2(1.0))) )
-		imageStore(results, ivec3(TexC, 4), vec4(posZIntersect.xy,0,1));
-
-	vec3 negZNormal = normalize(transpose(inverse(mat3(viewMatrix))) * vec3(0,0,1));
+	
+	
+	if (t != 0) {
+		pos = fl4 * vec4(posZIntersect, 1);
+		imageStore(results, ivec3(planeWidth/2+ planeWidth*pos.xy, 4), light);
+	}
+					
 	vec3 negZIntersect = intersectPlane(
-		negZNormal,
-		vec3(viewMatrix * vec4(0, 0, -boxSize/2.0, 1)),
-		vec3(lightdir),
-		pixelPos
+		vec3(0,0,-1.0),
+		vec3(0, 0, -boxSize/2.0),
+		lightdir,
+		pixelPos,
+		t
 	);
-	TexC = ivec2(negZIntersect.x * planeWidth, negZIntersect.y * planeHeight);
-
-	if (all(greaterThan(negZIntersect.xy, vec2(0.0))) && all(lessThan(negZIntersect.xy, vec2(1.0))) )
-		imageStore(results, ivec3(TexC, 5), vec4(negZIntersect.xy,0,1));
-  
+	
+	if (t != 0) {
+		pos = fl5 * vec4(negZIntersect, 1);
+		imageStore(results, ivec3(planeWidth/2+ planeWidth*pos.xy,5), light);
+	}
 }

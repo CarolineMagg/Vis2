@@ -35,7 +35,7 @@ public:
 	glm::vec3 front;
 	glm::vec3 up;
 
-	float speed = 5.00f;
+	float speed = 50.00f;
 
 private:	
 	glm::mat4 viewMatrix;
