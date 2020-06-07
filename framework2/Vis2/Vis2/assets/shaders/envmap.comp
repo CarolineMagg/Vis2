@@ -21,7 +21,7 @@ uniform vec3 middleOfPlaneVSOpp;
 uniform float planeWidth;
 uniform float planeHeight;
 
-layout(location = 100) uniform mat4 fl;
+layout(location = 100) uniform mat4 fl0;
 layout(location = 101) uniform mat4 fl1;
 layout(location = 102) uniform mat4 fl2;
 layout(location = 103) uniform mat4 fl3;
@@ -63,7 +63,7 @@ void main() {
 	);
 	vec4 pos = vec4(0);	
 	if (t != 0) {
-		pos = fl * vec4(posXIntersect, 1);	
+		pos = fl0 * vec4(posXIntersect, 1);	
 		imageStore(results, ivec3(planeWidth /2+ planeWidth*pos.xy, 0), light);
 	}
 			
