@@ -1,6 +1,7 @@
 #pragma once
 #include "spline.h"
 #include <vector>
+#include <functional> 
 #include "../tex/Texture.h"
 #include <iostream>
 
@@ -24,13 +25,16 @@ public:
 	std::vector<double> aPos;
 	std::vector<double> aCol;
 
-	glm::vec2 pointNumbers[4];
+	glm::vec3 pointNumbers[4];
 
 private:
 
-	void initColorAlphaTransferTexture();
+	void initColorAlphaTransferTexture(int id);
+	void checkValuesColor(std::vector<double> &color);
+	void checkValuesPosition(std::vector<double> &position);
 
 	void setSplines();
 	tk::spline r, g, b, a;
+	int id;
 
 };

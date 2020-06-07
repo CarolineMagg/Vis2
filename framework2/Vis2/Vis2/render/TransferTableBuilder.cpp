@@ -2,16 +2,14 @@
 #include "TransferTableBuilder.h"
 TransferTableBuilder::TransferTableBuilder(int id)
 {
-
-	gCol.reserve(50);
-
 	std::cout << "Init transfer function " << id << std::endl;
 	colorTexture.createEmptyTexture(256, 256, 4);
-	initColorAlphaTransferTexture();
+	this->id = id;
+	initColorAlphaTransferTexture(id);
 	getColorAlphaTransferTexture();
 }
 
-void TransferTableBuilder::initColorAlphaTransferTexture() 
+void TransferTableBuilder::initColorAlphaTransferTexture(int id) 
 {
 	rPos = { 0.0, 0.5, 0.8, 1.0 };
 	rCol = { 0, 0, 100, 255 };
@@ -25,21 +23,30 @@ void TransferTableBuilder::initColorAlphaTransferTexture()
 	aPos = { 0.0, 0.6, 1.0 };
 	aCol = { 0.0,  0.05 * 255.0, 0.4 * 255.0 };
 
-	pointNumbers[0] = glm::vec2(1,rCol.size());
-	pointNumbers[1] = glm::vec2(2, gCol.size());
-	pointNumbers[2] = glm::vec2(3, bCol.size());
-	pointNumbers[3] = glm::vec2(4, aCol.size());
+	pointNumbers[0] = glm::vec3(1,rCol.size(),id);
+	pointNumbers[1] = glm::vec3(2, gCol.size(),id);
+	pointNumbers[2] = glm::vec3(3, bCol.size(),id);
+	pointNumbers[3] = glm::vec3(4, aCol.size(),id);
 
 }
 
 unsigned int TransferTableBuilder::getColorAlphaTransferTexture()
 {
+	checkValuesColor(rCol);
+	checkValuesColor(gCol);
+	checkValuesColor(bCol);
+	checkValuesColor(aCol);
+	checkValuesPosition(rPos);
+	checkValuesPosition(gPos);
+	checkValuesPosition(bPos);
+	checkValuesPosition(aPos);
+
 	setSplines();
 
-	pointNumbers[0] = glm::vec2(1, rCol.size());
-	pointNumbers[1] = glm::vec2(2, gCol.size());
-	pointNumbers[2] = glm::vec2(3, bCol.size());
-	pointNumbers[3] = glm::vec2(4, aCol.size());
+	pointNumbers[0] = glm::vec3(1, rCol.size(), id);
+	pointNumbers[1] = glm::vec3(2, gCol.size(), id);;
+	pointNumbers[2] = glm::vec3(3, bCol.size(), id);
+	pointNumbers[3] = glm::vec3(4, aCol.size(), id);
 
 	double x = 1.0;
 	unsigned __int8 imageData[256 * 256 * 4];
@@ -75,7 +82,7 @@ unsigned int TransferTableBuilder::getColorAlphaTransferTexture()
 unsigned int TransferTableBuilder::resetColorAlphaTransferTexture()
 {
 	colorTexture.createEmptyTexture(256, 256, 4);
-	initColorAlphaTransferTexture();
+	initColorAlphaTransferTexture(id);
 	return getColorAlphaTransferTexture();
 }
 
@@ -90,4 +97,26 @@ void TransferTableBuilder::setSplines()
 unsigned int TransferTableBuilder::getTransfer()
 {
 	return colorTexture.id;
+}
+
+void TransferTableBuilder::checkValuesColor(std::vector<double> &color) {
+	for (std::vector<int>::size_type i = 0; i != color.size(); i++) {
+		if (color[i] > 255) {
+			color[i] = 255;
+		}
+		if (color[i] < 0) {
+			color[i] = 0;
+		}
+	}
+}
+
+void TransferTableBuilder::checkValuesPosition(std::vector<double> &position) {
+	for (std::vector<int>::size_type i = 0; i != position.size(); i++) {
+		if (position[i] > 1) {
+			position[i] = 1;
+		}
+		if (position[i] < 0) {
+			position[i] = 0;
+		}
+	}
 }
