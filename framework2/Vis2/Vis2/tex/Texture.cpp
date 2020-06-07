@@ -189,7 +189,7 @@ unsigned int Texture::createEmptyCubeTexture(int width, int height, int nrChanne
 	glTexParameterfv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexStorage2D(GL_TEXTURE_CUBE_MAP, 10, sizedFormat, width, height);
+	glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, sizedFormat, width, height);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	return id;
