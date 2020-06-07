@@ -9,7 +9,8 @@ uniform float currentZVS;
 uniform vec3 middleOfPlaneVS;
 uniform float sphereRadius;
 uniform ivec2 dims;
-
+uniform vec3 refractionPos;
+uniform vec4 refractionValue;
 
 uniform float shininess;
 uniform float specularCoeff;
@@ -58,14 +59,14 @@ void sampleCentralDifferenceValues(vec3 samplePosition, float sampleDistance, ou
 
 float RefractionTransfer(float value)
 {
-	if (value < 0.25)
-		return 1.0;
-	if (value < 0.5)
-		return (value * (1.35 - 1.0)) + 1.0;
-	if (value < 0.7)
-		return (value * (1.45 - 1.35)) + 1.35;
+	if (value < refractionPos.x)
+		return refractionValue.x;
+	if (value < refractionPos.y)
+		return (value * (refractionValue.y - refractionValue.x)) + refractionValue.x;
+	if (value < refractionPos.z)
+		return (value * (refractionValue.z - refractionValue.y)) + refractionValue.y;
 	
-	return (value * (1.8 - 1.45)) + 1.45;	
+	return (value * (refractionValue.w - refractionValue.z)) + refractionValue.z;	
 }
 
 vec3 RefractionTransfer(vec3 value)
