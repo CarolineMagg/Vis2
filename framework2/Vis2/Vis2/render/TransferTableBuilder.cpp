@@ -43,7 +43,7 @@ void TransferTableBuilder::initColorAlphaTransferTexture(TransferType id)
 		bCol = { 0,  100, 0 };
 
 		aPos = { 0.0, 0.3, 1.0 };
-		aCol = { 0.0,  0.0, 0.2 * 255.0 };
+aCol = { 0.0,  0.0, 0.2 * 255.0 };
 	}
 
 
@@ -126,13 +126,31 @@ unsigned int TransferTableBuilder::getTransferTexture()
 void TransferTableBuilder::checkValuesColor(std::vector<double> &color) {
 	for (double& i : color)
 	{
-		i = std::max(std::min(255.0, i), 0.0);
-	}	
+		if (i > 255)
+			i = 255;
+		if (i < 0)
+			i = 0;
+	}
 }
 
 void TransferTableBuilder::checkValuesPosition(std::vector<double> &position) {
 	for (double& i : position)
 	{
-		i = std::max(std::min(1.0, i), 0.0);
+		if (i > 1)
+			i = 1;
+		if (i < 0)
+			i = 0;
 	}
+	for (std::vector<int>::size_type j = 0; j != position.size()-1; j++) {
+		if (position[j] > position[j + 1])
+			position[j] = position[j + 1] - 0.01;
+		for (std::vector<int>::size_type k = j+1; k != position.size(); k++) {
+			if (position[j] == position[k])
+				if (j!=0)
+					position[j] = position[k] - 0.0005;
+				else
+					position[k] = position[j] + 0.001;
+		}
+	}
+
 }
