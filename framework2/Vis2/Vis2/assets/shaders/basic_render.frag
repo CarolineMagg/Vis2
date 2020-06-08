@@ -9,13 +9,16 @@ vec3 sampleOffset[20] = vec3[]
    vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
 );
 
-in VertexData {
-	vec3 position_model;	
-} vert;
+in vec3 position_model;
+in vec3 FragPos;
+in vec3 Normal;
+in vec2 TexCoords;
+
 
 out vec4 color;
 
 uniform samplerCube tex;
+uniform vec3 lightColor;
 
 
 void main() {
@@ -26,9 +29,11 @@ void main() {
 	int numSamples = 3;
 	for (int i = 0; i < numSamples; i++)
 	{
-		color += texture(tex, vert.position_model + sampleOffset[i] * 0.01);
+		color += texture(tex, position_model + sampleOffset[i] * 0.01);
 	}
 	
 	color /= numSamples;
-	color = vec4(0.1,0.1,0.1,1.0) + vec4(color.xyz, 0.0);
+	if (length(color) < 0.001) {
+		color = vec4(0.0,0.0,0.0,1);		
+	}
 }
