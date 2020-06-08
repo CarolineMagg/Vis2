@@ -37,19 +37,19 @@
 <hr>
 <h1>Interactive Dynamic Volume Illumination with Refraction and Caustics</h1>
 <div class="b">
-    <img src="unnamed.jpg" alt="Teaser" style="width:19%">
+    <img src="teaser02.png" alt="Teaser" style="width:19%">
 </div>
 
 <hr>
 
 <h2>Description</h2>
 
+<p style="float: right;">
+    <img src="light_viewing_rays.png" alt="Rays" style="height:50%">
+</p>
+
 <div class="a">
-    <p><b>Original paper</b></p>
-    
-    <p style="float: right;">
-        <img src="light_viewing_rays.png" alt="Rays" style="height:50%">
-    </p>
+    <p><b>Original paper</b></p>    
 
     <p>
         This program is an implementation of the paper "Interactive Dynamic Volume Illumination with Refraction and Caustics" by Jens G. Magnus and Stefan Bruckner.
@@ -67,24 +67,22 @@
 </div>
 
 <div class="a">    
-    <p><b>Implementation concept</b></p>
+    <p><b>Implementation</b></p>
 
     <p>The concept is based on the described pseudocode and consists of the following steps:</p>
     <ol>
-        <li>Load models and corresponding transfer functions & initialize all scene parameters like camera and light source.</li>        
-        <li>Create sphere around model and calculate first plane parallel to image plane intersection with this sphere.
-            This plane will be used as reference plane for the plane-by-plane calculations.
-        </li>
-        <li>Initialize 7 framebuffers with 2 layers for light color and direction, viewing ray position and
-            direction, accumulated color and medium buffer and the output buffer by means of a compute shader. 
+        <li>Load models and corresponding transfer functions & initialize all scene parameters like camera and light source.</li>  
+        <li>The model is located in the origin of the scene. To maximize the number of sample points, 
+            the first plane is located tangent to a sphere enclosing the model. The last plane is on the opposite
+            side of the sphere. The height and width of the planes are variable and can be set in the source code. </li> 
+        <li>The volumetric compute shader initializes 7 framebuffers with 2 layers for light color and direction, viewing ray position and
+            direction, accumulated color and medium buffer and the output buffer.
             These buffers will be used to read the previous and write the information for the current layer in a ping-pong manner.</li>
-        <li>Perform light ray propagation by backward-integration together with light intensity correction and view ray propagation 
-            by forward-integration in every rendering step.</li>
+        <li>The volumetric rendering shader implements the concept of the paper.</li>
+        <li>Then, a second compute shader generates an environment map of shadows and refractions and draws the result on a cube texture.</li>
+        <li>Next, there is a basic geometry pass to draw the cube utilizing the previously created texture to the screen.</li>
+        <li>Finally, there is another render pass which draws the resulting plane of step 4 to the screen.</li>
     </ol>
-    <p>
-        Step 4 is the main part of the program. It splits into light and viewing ray propagation.
-        PUT HERE WHAT FRAGMENT SHADER DOES
-    </p>
 </div>
 
 
@@ -98,7 +96,7 @@
         <li>Enable/Disable light intensity correction to recover caustic effects.</li>
         <li>Enable/Disable enviroment mapping to capture contributions visible on the background.</li>
         <li>Enable/Disable viewing ray refraction to deflect the ray in view direction.</li>
-        <li>Enable/Disable specular light component with Blinn-Phong model.</li>
+        <li>Enable/Disable specular light component.</li>
         <li>Camera rotation around the object.</li>
         <li>Light movement to the right, left, up and down - always behind and relativ to the camera.</li>
     </ul>
@@ -141,7 +139,7 @@
     <p>
         <i></i>Settings</i> is divided into three parts: 
         <ul>
-            <li>Mesh: A drop-down menu allows the user to change the object after loading additional meshes.
+            <li>Mesh: A drop-down menu allows the user to change the object.
                 The number of rendered slices can be changed in order to increase the frames per second or to increase the quality. 
             </li>
             <li>Light: This sections allows control over different light settings: enable/disable 
