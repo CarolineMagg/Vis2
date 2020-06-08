@@ -140,26 +140,6 @@ void FBO::createFrameBuffers(unsigned int nrColorTexture, bool useDepthTexture, 
 }
 
 void FBO::copyFBO(const FBO& from, const FBO& to, unsigned int bufferMask) {
-
-	/*if (from.hasSecondaryColorBuffer && to.hasSecondaryColorBuffer) {
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, from.fbo);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, to.fbo);
-		glNamedFramebufferReadBuffer(from.fbo, GL_COLOR_ATTACHMENT1);
-		glNamedFramebufferDrawBuffer(to.fbo, GL_COLOR_ATTACHMENT1);
-		glBlitFramebuffer(0, 0, from.width, from.height, 0, 0, to.width, to.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		glNamedFramebufferReadBuffer(from.fbo, GL_COLOR_ATTACHMENT0);
-		glNamedFramebufferDrawBuffer(to.fbo, GL_COLOR_ATTACHMENT0);
-		glBlitFramebuffer(0, 0, from.width, from.height, 0, 0, to.width, to.height, bufferMask, GL_NEAREST);
-		unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-		glNamedFramebufferDrawBuffers(to.fbo, 2, attachments);
-	}
-	else {
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, from.fbo);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, to.fbo);
-		glBlitFramebuffer(0, 0, from.width, from.height, 0, 0, to.width, to.height, bufferMask, GL_NEAREST);
-	}
-	*/
-	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

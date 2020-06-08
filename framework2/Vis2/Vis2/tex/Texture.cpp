@@ -224,5 +224,3 @@ void Texture::writeOnTexture(unsigned width, unsigned int height, unsigned char*
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
-//stbi_set_flip_vertically_on_load(doFlip);

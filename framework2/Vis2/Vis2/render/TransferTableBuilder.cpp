@@ -79,8 +79,6 @@ unsigned int TransferTableBuilder::getColorAlphaTransferTexture()
 	{
 		for (int j = 0; j < 256; j++)
 		{
-
-			//colorTexture.writeOnTexture(i, j, (glm::vec3(r(i), g(i), b(i)) + glm::vec3(r(j), g(j), b(j))) / 2.0f);
 			unsigned int ri = r((double)i / 255.0);
 			unsigned int rj = r((double)j / 255.0);
 			unsigned int gi = g((double)i / 255.0);

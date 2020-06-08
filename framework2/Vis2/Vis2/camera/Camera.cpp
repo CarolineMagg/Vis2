@@ -7,8 +7,6 @@
 Camera::Camera(float fov, float aspectRatio, float near, float far) {	
 	this->position = glm::vec3(0.0f, 0.0f, 2.0f);
 	this->front = glm::vec3(0.0f, 0.0f, 1.0f);
-	//this->position = glm::vec3(0.0f, 2.0f, 0.0f);
-	//this->front = glm::vec3(0.0f, 0.0f, -1.0f);
 	this->up = glm::vec3(0.0, 1.0, 0.0);
 	this->distance = 2.0f;
 	this->pitch = -25.0f;
@@ -53,7 +51,7 @@ void Camera::processKeyInput(GLFWwindow *window, float frameDeltaTime) {
 		yaw -= 1.0 * sp;
 	}
 
-	if (pitch > 80.0)  // add this as option
+	if (pitch > 80.0)
 		pitch = 80.0;
 	if (pitch < -80.0)
 		pitch = -80.0;
