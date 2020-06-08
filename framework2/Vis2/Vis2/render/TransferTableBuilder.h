@@ -36,6 +36,10 @@ public:
 
 	int getType() { return id;  }
 
+	void printValues();
+
+
+
 private:
 
 	void initColorAlphaTransferTexture(TransferType id);

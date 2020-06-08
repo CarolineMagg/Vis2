@@ -1,7 +1,6 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <iostream>
 #include "Camera.h"
-#include "Constants.h"
 #include "../shading/Shader.h"
 
 Camera::Camera(float fov, float aspectRatio, float near, float far) {	

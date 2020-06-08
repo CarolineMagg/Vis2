@@ -1,6 +1,8 @@
-
 #include "TransferTableBuilder.h"
 #include <algorithm>
+#include <glm/gtx/string_cast.hpp>
+#include <iostream>
+#include <iterator>
 TransferTableBuilder::TransferTableBuilder(TransferType type)
 {	
 	this->id = type;	
@@ -151,4 +153,22 @@ void TransferTableBuilder::checkValuesPosition(std::vector<double> &position) {
 		}
 	}
 
+}
+
+void TransferTableBuilder::printValues() {
+	std::cout << std::endl;
+	std::cout << "\nID:" << id << std::endl;
+	std::cout << "\nRED:" << std::endl;
+	std::copy(this->rCol.begin(), rCol.end(), std::ostream_iterator<double>(std::cout, " "));
+	std::copy(this->rPos.begin(), rPos.end(), std::ostream_iterator<double>(std::cout, " "));
+	std::cout << "\nGREEN:" << std::endl;
+	std::copy(this->gCol.begin(), gCol.end(), std::ostream_iterator<double>(std::cout, " "));
+	std::copy(this->gPos.begin(), gPos.end(), std::ostream_iterator<double>(std::cout, " "));
+	std::cout << "\nBLUE:" << std::endl;
+	std::copy(this->bCol.begin(), bCol.end(), std::ostream_iterator<double>(std::cout, " "));
+	std::copy(this->bPos.begin(), bPos.end(), std::ostream_iterator<double>(std::cout, " "));
+	std::cout << "\nALPHA:" << std::endl;
+	std::copy(this->aCol.begin(), aCol.end(), std::ostream_iterator<double>(std::cout, " "));
+	std::copy(this->aPos.begin(), aPos.end(), std::ostream_iterator<double>(std::cout, " "));
+	std::cout << std::endl;
 }
