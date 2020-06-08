@@ -38,6 +38,7 @@
 <h1>Interactive Dynamic Volume Illumination with Refraction and Caustics</h1>
 <div class="b">
     <img src="teaser02.png" alt="Teaser" style="width:19%">
+    <img src="teaser04.png" alt="Teaser" style="width:19%">
 </div>
 
 <hr>
@@ -73,10 +74,10 @@
     <ol>
         <li>Load models and corresponding transfer functions & initialize all scene parameters like camera and light source.</li>  
         <li>The model is located in the origin of the scene. To maximize the number of sample points, 
-            the first plane is located tangent to a sphere enclosing the model. The last plane is on the opposite
+            the first plane is located tangent to a sphere enclosing the model. <br> The last plane is on the opposite
             side of the sphere. The height and width of the planes are variable and can be set in the source code. </li> 
         <li>The volumetric compute shader initializes 7 framebuffers with 2 layers for light color and direction, viewing ray position and
-            direction, accumulated color and medium buffer and the output buffer.
+            direction, accumulated color and medium buffer and the output buffer.<br>
             These buffers will be used to read the previous and write the information for the current layer in a ping-pong manner.</li>
         <li>The volumetric rendering shader implements the concept of the paper.</li>
         <li>Then, a second compute shader generates an environment map of shadows and refractions and draws the result on a cube texture.</li>
