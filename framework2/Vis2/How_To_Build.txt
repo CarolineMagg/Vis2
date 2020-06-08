@@ -1,0 +1,9 @@
+- Open 'Vis2.sln" project in visual studio 2019.
+- Select debug or release build in 32 bits.
+
+////////////
+
+source files: /Vis2
+documents: /doc , /html
+
+
