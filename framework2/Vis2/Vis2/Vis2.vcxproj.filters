@@ -69,7 +69,6 @@
   <ItemGroup>
     <Text Include="assets\shaders\debug_texturedraw_fs.txt" />
     <Text Include="assets\shaders\debug_texturedraw_vs.txt" />
-    <Text Include="assets\shaders\vol_fs.txt" />
     <Text Include="assets\shaders\vol_vs.txt" />
     <Text Include="assets\shaders\base_vs.txt" />
     <Text Include="assets\shaders\volume.geom" />

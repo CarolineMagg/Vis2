@@ -106,7 +106,7 @@ unsigned int Texture::load3DTexture(std::string path, int width, int height, int
 				} else
 					cout << "Unsupported Texture format!" << path << endl;
 
-				glTexStorage3D(GL_TEXTURE_3D, 1, sizedFormat, width, height, endIndex - beginIndex + 1);
+				glTexStorage3D(GL_TEXTURE_3D, 5, sizedFormat, width, height, endIndex - beginIndex + 1);
 			}
 
 			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, i - beginIndex, width, height, 1, format, GL_UNSIGNED_BYTE, data);			
@@ -189,7 +189,15 @@ unsigned int Texture::createEmptyCubeTexture(int width, int height, int nrChanne
 	glTexParameterfv(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, sizedFormat, width, height);
+
+	int w = 1;
+	int l = 0;
+	while (width > w) {
+		w *= 2;
+		l++;
+	};		
+
+	glTexStorage2D(GL_TEXTURE_CUBE_MAP, l, sizedFormat, width, height);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	return id;

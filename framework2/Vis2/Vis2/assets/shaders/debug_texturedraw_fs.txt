@@ -16,7 +16,7 @@ uniform int glLayer;
 
 void main()
 {  
-     vec4 res = texture(depthMap2, vec3(TexCoords,glLayer));// + texture(depthMap2, vec3(TexCoords,1));
+     vec4 res = texture(depthMap2, vec3(TexCoords,glLayer));
      if (length(res.xyz) < 0.001)
        discard;
 

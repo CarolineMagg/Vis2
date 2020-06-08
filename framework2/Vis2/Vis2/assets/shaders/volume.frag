@@ -1,6 +1,5 @@
 ﻿#version 450 core
 in vec2 TexCoords;
-in vec3 WorldPosG;
 
 uniform mat4 inverseViewMatrix;
 uniform mat4 viewMatrix;
@@ -8,6 +7,7 @@ uniform float planeDistance;
 uniform float currentZVS;
 uniform vec3 middleOfPlaneVS;
 uniform float sphereRadius;
+uniform vec2 planeSides;
 uniform ivec2 dims;
 uniform vec3 refractionPos;
 uniform vec4 refractionValue;
@@ -38,14 +38,6 @@ layout (location = 3) out vec4 ldbOut;
 layout (location = 4) out vec4 cbOut;
 layout (location = 5) out vec4 mbOut;
 layout (location = 6) out vec4 debugOut;
-
-
-/*s1.x = textureLod(volTexture, samplePosition - vec3(sampleDistance,0,0), lod).r; 
-	s2.x = textureLod(volTexture, samplePosition + vec3(sampleDistance,0,0), lod).r; 
-	s1.y = textureLod(volTexture, samplePosition - vec3(0,sampleDistance,0), lod).r; 
-	s2.y = textureLod(volTexture, samplePosition + vec3(0,sampleDistance,0), lod).r;
-	s1.z = textureLod(volTexture, samplePosition + vec3(0,0,sampleDistance), lod).r;
-	s2.z = textureLod(volTexture, samplePosition - vec3(0,0,sampleDistance), lod).r;	*/
 
 void sampleCentralDifferenceValues(vec3 samplePosition, float sampleDistance, out vec3 s1 , out vec3 s2)
 {	
@@ -113,6 +105,10 @@ vec3 intersectPlane(vec3 n, vec3 p0, vec3 r, vec3 r0)
 
 
 void main() {
+	
+	vec3 texOffset = vec3(0.5);//mat3(inverseViewMatrix) * vec3(planeSides, 0.5);	
+	vec2 texFactor2 = vec2(planeSides/0.5);
+
 	int readLayer = 1 - gl_Layer;
 	int writeLayer = gl_Layer;
 
@@ -128,18 +124,10 @@ void main() {
 	).xy;
 
 	//TODO worldpos geometry shader way or this way??
-	vec3 volumePosLPI_1 = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + lpi_1 - vec2(0.5), currentZVS + planeDistance, 1.0)).xyz + vec3(0.5);
-	vec3 WorldPos = (inverseViewMatrix * vec4(middleOfPlaneVS.xy + TexCoords - vec2(0.5), currentZVS, 1.0)).xyz + vec3(0.5);
+	vec3 volumePosLPI_1 = (inverseViewMatrix * vec4(texFactor2 * (middleOfPlaneVS.xy + lpi_1 - 0.5), currentZVS + planeDistance, 1.0)).xyz + texOffset;
+	vec3 WorldPos = (inverseViewMatrix * vec4(texFactor2 * (middleOfPlaneVS.xy + TexCoords - 0.5), currentZVS, 1.0)).xyz + texOffset;
 
-	// TODO FILTERING
-
-	vec4 Li_1 = texture(lb, vec3(lpi_1, readLayer));
-	Li_1 += texture(lb, vec3(lpi_1 + vec2(1)/dims, readLayer)) * 0.05;
-	Li_1 += texture(lb, vec3(lpi_1 + vec2(-1)/dims, readLayer)) * 0.05;
-	Li_1 += texture(lb, vec3(lpi_1 + vec2(1, -1)/dims, readLayer)) * 0.05;
-	Li_1 += texture(lb, vec3(lpi_1 + vec2(-1, 1)/dims, readLayer)) * 0.05;
-	Li_1 = Li_1 / 1.20;
-	
+	vec4 Li_1 = texture(lb, vec3(lpi_1, readLayer));	
 	
 	vec4 ldi_1 = texture(ldb, vec3(lpi_1, readLayer));
 	ldi_1 += texture(ldb, vec3(lpi_1 + vec2(1,0)/dims, readLayer)) * 0.25;
@@ -191,17 +179,17 @@ void main() {
 	), 1.0);
 
 	vec4 vpi_1WorldPos = inverseViewMatrix * vpi_1;
-	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + vec3(0.5)).x;;		
-	float volumeVPI_1 =  texture(volTexture, vec3(vpi_1WorldPos) + vec3(0.5)).x;
+	float volumeVPI =  texture(volTexture, vec3(vpiWorldPos) + texOffset).x;;		
+	float volumeVPI_1 =  texture(volTexture, vec3(vpi_1WorldPos) + texOffset).x;
 	vec4 transferV =  texture(volumeTransfer, vec2(volumeVPI, volumeVPI_1)) ;
 
-	vec3 refractionView = getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + vec3(0.5));
+	vec3 refractionView = getRefractionGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + texOffset);
 
 	vec3 is = vec3(0);
 	if (useSpec) 
 	{
 		vec3 halfwayDir = normalize(-ldi + vdi).xyz;
-		vec3 normal = -getVolumeGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + vec3(0.5));	
+		vec3 normal = -getVolumeGradient((vpiWorldPos.xyz + vpi_1WorldPos.xyz)/2.0 + texOffset);	
 		float refractionPlaneDiff = max(abs(RefractionTransfer(volumeVPI_1) - RefractionTransfer(volumeVPI)) - 0.15, 0.0);
 	
 		is =  id.xyz * refractionPlaneDiff * pow(max(dot(halfwayDir, normal), 0.0),shininess);//vec4(0.0); //TODO: specular component

@@ -14,6 +14,7 @@ uniform mat4 inverseViewMatrix;
 uniform mat4 proj;
 uniform int glLayer;
 uniform vec3 middleOfPlaneVS;
+uniform vec2 planeSides;
 uniform float sphereRadius;
 
 void main()
@@ -21,7 +22,7 @@ void main()
 	for(int i=0; i<3; i++)
 	{
 		TexCoords = gs_in[i].aTexCoords;
-		gl_Position = proj * vec4(middleOfPlaneVS + vec3(gl_in[i].gl_Position.xy/2.0, 0),1);		
+		gl_Position = proj * vec4(middleOfPlaneVS + vec3(gl_in[i].gl_Position.xy*planeSides, 0),1);		
 		EmitVertex();
 	}
 	EndPrimitive();
