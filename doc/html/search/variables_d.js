@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['rcol_349',['rCol',['../class_transfer_table_builder.html#ad0b5b93464a93679bf6775bdd2547ca3',1,'TransferTableBuilder']]],
-  ['refractionbar_350',['RefractionBar',['../_vis2_8cpp.html#a64c257ccf472bb558da0862426c0052e',1,'Vis2.cpp']]],
-  ['refractionpos_351',['refractionPos',['../_vis2_8cpp.html#a114305bd8d05780b975f18168ca0010c',1,'Vis2.cpp']]],
-  ['refractionvalue_352',['refractionValue',['../_vis2_8cpp.html#a0ef0ff07d86117204a8f1292504307bc',1,'Vis2.cpp']]],
-  ['rpos_353',['rPos',['../class_transfer_table_builder.html#a4eb72cf80639d0a4d683c6e5aabf77dd',1,'TransferTableBuilder']]]
+  ['shader_5fdir_349',['SHADER_DIR',['../class_shader.html#ae9ddaf2d0b5b32b866debf579fc84d21',1,'Shader']]],
+  ['shininess_350',['shininess',['../_vis2_8cpp.html#aaf01223c58664994607143edadcdfd15',1,'Vis2.cpp']]],
+  ['speed_351',['speed',['../class_camera.html#a2960f533df18fe6d7d574c316c6d217a',1,'Camera']]],
+  ['speedlight_352',['speedLight',['../_vis2_8cpp.html#a6919f960092f6f9fa60fd5956f549f8c',1,'Vis2.cpp']]],
+  ['spot_5fcount_353',['SPOT_COUNT',['../class_shader.html#aaa63d15ece7ea4f08910239c022b6d69',1,'Shader']]]
 ];

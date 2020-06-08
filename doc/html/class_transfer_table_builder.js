@@ -6,6 +6,7 @@ var class_transfer_table_builder =
     [ "getTransferTexture", "class_transfer_table_builder.html#adb97488b297e8d5d6d695f3e49618ba9", null ],
     [ "getType", "class_transfer_table_builder.html#adf9acdcb75416fd51c83bfd47d8547ba", null ],
     [ "initResources", "class_transfer_table_builder.html#aac86f30965ddf69a6d5637d47c91c350", null ],
+    [ "printValues", "class_transfer_table_builder.html#a748e692b0b129675116a3707d3b09310", null ],
     [ "resetColorAlphaTransferTexture", "class_transfer_table_builder.html#ad77d506ba8bf52a9990347778b4d7206", null ],
     [ "aCol", "class_transfer_table_builder.html#a364769a27fa0e79025774efc2eb6b3e1", null ],
     [ "aPos", "class_transfer_table_builder.html#a3fd0763217b06269a09b4244e9b64768", null ],

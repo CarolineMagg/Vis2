@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['quadvao_347',['quadVAO',['../_vis2_8cpp.html#aa2fa0da5abaf6e98e149e2b6c54758e7',1,'Vis2.cpp']]],
-  ['quadvbo_348',['quadVBO',['../_vis2_8cpp.html#a1c2555ae36fb2991bc48830d53e45625',1,'Vis2.cpp']]]
+  ['rcol_344',['rCol',['../class_transfer_table_builder.html#ad0b5b93464a93679bf6775bdd2547ca3',1,'TransferTableBuilder']]],
+  ['refractionbar_345',['RefractionBar',['../_vis2_8cpp.html#a64c257ccf472bb558da0862426c0052e',1,'Vis2.cpp']]],
+  ['refractionpos_346',['refractionPos',['../_vis2_8cpp.html#a114305bd8d05780b975f18168ca0010c',1,'Vis2.cpp']]],
+  ['refractionvalue_347',['refractionValue',['../_vis2_8cpp.html#a0ef0ff07d86117204a8f1292504307bc',1,'Vis2.cpp']]],
+  ['rpos_348',['rPos',['../class_transfer_table_builder.html#a4eb72cf80639d0a4d683c6e5aabf77dd',1,'TransferTableBuilder']]]
 ];

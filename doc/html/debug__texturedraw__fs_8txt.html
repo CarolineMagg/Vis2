@@ -102,12 +102,8 @@ Variables</h2></td></tr>
 <tr class="separator:af5639df2ce0dea4170bb8b47a599911e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58b0e682d807370a92bb4b37474353a5"><td class="memItemLeft" align="right" valign="top">in vec2&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="debug__texturedraw__fs_8txt.html#a58b0e682d807370a92bb4b37474353a5">TexCoords</a></td></tr>
 <tr class="separator:a58b0e682d807370a92bb4b37474353a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a713b94a413d0465aa7e8eae997af4f0e"><td class="memItemLeft" align="right" valign="top">uniform sampler2DArray&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="debug__texturedraw__fs_8txt.html#a713b94a413d0465aa7e8eae997af4f0e">dmmm</a></td></tr>
-<tr class="separator:a713b94a413d0465aa7e8eae997af4f0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2161f934c7b9c061ed5bcbbfb3536149"><td class="memItemLeft" align="right" valign="top">uniform sampler2DArray&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="debug__texturedraw__fs_8txt.html#a2161f934c7b9c061ed5bcbbfb3536149">depthMap2</a></td></tr>
-<tr class="separator:a2161f934c7b9c061ed5bcbbfb3536149"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62cd7dfa3003a9d56df2feee3720f4dd"><td class="memItemLeft" align="right" valign="top">uniform sampler2D&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="debug__texturedraw__fs_8txt.html#a62cd7dfa3003a9d56df2feee3720f4dd">tex3</a></td></tr>
-<tr class="separator:a62cd7dfa3003a9d56df2feee3720f4dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61eb551d71378c53c9ab284f4358fdef"><td class="memItemLeft" align="right" valign="top">uniform sampler2DArray&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="debug__texturedraw__fs_8txt.html#a61eb551d71378c53c9ab284f4358fdef">volumeResults</a></td></tr>
+<tr class="separator:a61eb551d71378c53c9ab284f4358fdef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae6537ab57bbb83f7b8dcf92baf6e1a00"><td class="memItemLeft" align="right" valign="top">uniform float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="debug__texturedraw__fs_8txt.html#ae6537ab57bbb83f7b8dcf92baf6e1a00">near_plane</a></td></tr>
 <tr class="separator:ae6537ab57bbb83f7b8dcf92baf6e1a00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6574c9907028d28cf20228da45b46c00"><td class="memItemLeft" align="right" valign="top">uniform float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="debug__texturedraw__fs_8txt.html#a6574c9907028d28cf20228da45b46c00">far_plane</a></td></tr>
@@ -134,34 +130,6 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a id="a2161f934c7b9c061ed5bcbbfb3536149"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2161f934c7b9c061ed5bcbbfb3536149">&#9670;&nbsp;</a></span>depthMap2</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uniform sampler2DArray depthMap2</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a713b94a413d0465aa7e8eae997af4f0e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a713b94a413d0465aa7e8eae997af4f0e">&#9670;&nbsp;</a></span>dmmm</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uniform sampler2DArray dmmm</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a6574c9907028d28cf20228da45b46c00"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6574c9907028d28cf20228da45b46c00">&#9670;&nbsp;</a></span>far_plane</h2>
 
@@ -218,20 +186,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a62cd7dfa3003a9d56df2feee3720f4dd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a62cd7dfa3003a9d56df2feee3720f4dd">&#9670;&nbsp;</a></span>tex3</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uniform sampler2D tex3</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a58b0e682d807370a92bb4b37474353a5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a58b0e682d807370a92bb4b37474353a5">&#9670;&nbsp;</a></span>TexCoords</h2>
 
@@ -240,6 +194,20 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">in vec2 TexCoords</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a61eb551d71378c53c9ab284f4358fdef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61eb551d71378c53c9ab284f4358fdef">&#9670;&nbsp;</a></span>volumeResults</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uniform sampler2DArray volumeResults</td>
         </tr>
       </table>
 </div><div class="memdoc">
