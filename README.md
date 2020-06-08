@@ -5,4 +5,4 @@ This program is an implementation of the paper "Interactive Dynamic Volume Illum
 The documentation for the project can be found [here](https://github.com/CarolineMagg/Vis2/blob/master/html/index.html).
 
 
-![alt text](https://github.com/CarolineMagg/Vis2/blob/master/html/teaser04.png "Teaser")
+![alt text](https://github.com/CarolineMagg/Vis2/blob/master/framework2/Vis2/html/teaser04.png "Teaser")
